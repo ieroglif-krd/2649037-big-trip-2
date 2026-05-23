@@ -1,5 +1,5 @@
 import { EVENTS_COUNT, DATA_DATES } from '../const.js';
-import { getRandomNumber } from '../utils.js';
+import { getRandomNumber, getRandomOffers } from '../utils.js';
 import { destinations } from './destination.js';
 import { events } from './offers-data.js';
 
@@ -10,8 +10,9 @@ const lastDate = new Date(DATA_DATES.START);
 const destinationIds = destinations.map((d) => d.id);
 const destinationCity = destinationIds[getRandomNumber(0, destinationIds.length - 1)];
 
+
 //получаем предложения
-const eventsTypes = events.map((t)=>t.type);
+const eventsTypes = events.map((t) => t.type);
 
 
 const point = (index) => {
@@ -29,7 +30,6 @@ const point = (index) => {
   //записываем все (пока что) предложения
   const eventType = eventsTypes[getRandomNumber(0, eventsTypes.length - 1)];
   const eventData = events.find((e) => e.type === eventType);
-
   return {
     id: index,
     basePrice: getRandomNumber(),
@@ -37,7 +37,7 @@ const point = (index) => {
     dateTo: dateTo.toISOString(),
     destination: destinationCity,
     isFavorite: Boolean(Math.round(Math.random())),
-    offers: eventData.offers.map((offer)=>offer.id),
+    offers: getRandomOffers(eventData.offers),
     type: eventType
   };
 };
