@@ -7,6 +7,8 @@ import PointView from '../view/point-view.js';
 
 const RANDOM_POINT = 0;
 
+
+
 export default class BoardPresenter {
 
   constructor({ infoContainer, filterContainer, sortContainer, wayPointsModel }) {
@@ -15,6 +17,14 @@ export default class BoardPresenter {
     this.sortContainer = sortContainer;
     this.wayPointsModel = wayPointsModel;
   }
+
+  getOffersForPoint = (point) => {
+    const eventData = this.wayPointsModel.getEventByType(point.type);
+
+    return point.offers
+      .map((offerId) => eventData.offers.find((o) => o.id === offerId))
+      .filter(Boolean); // на случай, если id нет
+  };
 
   init() {
     // Рендер информации о маршруте
@@ -37,8 +47,10 @@ export default class BoardPresenter {
 
     // Создаем точки маршрута
 
+
     for (let i = 0; i < this.points.length; i++) {
-      render(new PointView({ point: this.points[i] }), listContainer);
+      const offers = this.getOffersForPoint(this.points[i]);
+      render(new PointView({ point: this.points[i], offers: offers }), listContainer);
     }
 
 

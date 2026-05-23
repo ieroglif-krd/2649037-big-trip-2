@@ -9,6 +9,6 @@ const DATA_DATES = {
   GAP: 7
 };
 
-const EVENTS_COUNT = 7;
+const POINTS_COUNT = 7;
 
-export {PRICE, EVENTS_COUNT, DATA_DATES };
+export {PRICE, POINTS_COUNT, DATA_DATES };

@@ -1,13 +1,12 @@
 import {createElement} from '../render.js';
 
-function createPointTemplate(point) {
+function createPointTemplate(point, offers) {
   const {
     type,
     destination,
     dateFrom,
     dateTo,
     basePrice,
-    offers,
     isFavorite
   } = point;
 
@@ -19,10 +18,11 @@ function createPointTemplate(point) {
 
   const day = startDate.toLocaleString('en-US', { month: 'short', day: 'numeric' });
 
-  // Пока офферы — это массив ID, просто выводим ID
-  const offersTemplate = offers.map((id) => `
+  // Теперь офферы — это массив объектов { id, title, price }
+  const offersTemplate = offers.map((offer) => `
     <li class="event__offer">
-      <span class="event__offer-title">Offer #${id}</span>
+      <span class="event__offer-title">${offer.title}</span>
+      &plus;&euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
     </li>
   `).join('');
 
@@ -69,21 +69,20 @@ function createPointTemplate(point) {
   `;
 }
 
-
 export default class PointView {
-  constructor({point}) {
+  constructor({point, offers}) {
     this.point = point;
+    this.offers = offers; // ← теперь храним готовые офферы
   }
 
   getTemplate() {
-    return createPointTemplate(this.point);
+    return createPointTemplate(this.point, this.offers);
   }
 
   getElement() {
     if (!this.element) {
       this.element = createElement(this.getTemplate());
     }
-
     return this.element;
   }
 
@@ -91,4 +90,3 @@ export default class PointView {
     this.element = null;
   }
 }
-
