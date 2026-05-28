@@ -16,3 +16,4 @@ const boardPresenter = new BoardPresenter({
 
 boardPresenter.init();
 
+

@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import dayjs from 'dayjs';
 
 function createEditFormTemplate(point, allOffers, destinationName) {
@@ -10,7 +10,6 @@ function createEditFormTemplate(point, allOffers, destinationName) {
     offers: selectedOfferIds
   } = point;
 
-  // Формат для input[type="text"] в ТЗ Академии
   const formatForInput = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 
   const start = formatForInput(dateFrom);
@@ -131,25 +130,18 @@ function createEditFormTemplate(point, allOffers, destinationName) {
   `;
 }
 
-export default class EditFormView {
+export default class EditFormView extends AbstractView{
+  #point = {};
+  #allOffers = {};
+  #destination = '';
   constructor({ point, allOffers, destination }) {
-    this.point = point;
-    this.allOffers = allOffers;
-    this.destination = destination;
+    super();
+    this.#point = point;
+    this.#allOffers = allOffers;
+    this.#destination = destination;
   }
 
-  getTemplate() {
-    return createEditFormTemplate(this.point, this.allOffers, this.destination);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEditFormTemplate(this.#point, this.#allOffers, this.#destination);
   }
 }

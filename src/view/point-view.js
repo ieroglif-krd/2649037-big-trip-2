@@ -1,10 +1,9 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import dayjs from 'dayjs';
 
 function createPointTemplate(point, offers, destination) {
   const {
     type,
-    //destination,
     dateFrom,
     dateTo,
     basePrice,
@@ -70,25 +69,18 @@ function createPointTemplate(point, offers, destination) {
   `;
 }
 
-export default class PointView {
+export default class PointView extends AbstractView{
+  #point = {};
+  #offers = {};
+  #destination = '';
   constructor({point, offers, destination}) {
-    this.point = point;
-    this.offers = offers;
-    this.destination = destination;
+    super();
+    this.#point = point;
+    this.#offers = offers;
+    this.#destination = destination;
   }
 
-  getTemplate() {
-    return createPointTemplate(this.point, this.offers, this.destination);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createPointTemplate(this.#point, this.#offers, this.#destination);
   }
 }
