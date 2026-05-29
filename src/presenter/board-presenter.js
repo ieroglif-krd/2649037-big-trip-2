@@ -2,8 +2,7 @@ import { render } from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
 import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
-import EditFormView from '../view/edit-form-view.js';
-import PointView from '../view/point-view.js';
+import PointPresenter from './point-presenter';
 
 export default class BoardPresenter {
   #infoContainer = {};
@@ -18,14 +17,6 @@ export default class BoardPresenter {
     this.#sortContainer = sortContainer;
     this.#wayPointsModel = wayPointsModel;
   }
-
-  #getOffersForPoint = (point) => {
-    const eventData = this.#wayPointsModel.getEventByType(point.type);
-
-    return point.offers
-      .map((offerId) => eventData.offers.find((o) => o.id === offerId))
-      .filter(Boolean); // на случай, если id нет
-  };
 
   init() {
     // Рендер информации о маршруте
@@ -46,22 +37,13 @@ export default class BoardPresenter {
     const listContainer = document.createElement('ul');
     listContainer.classList.add('trip-events__list');
     this.#sortContainer.append(listContainer);
-
     this.#points = this.#wayPointsModel.getPoints();
 
-    // Создаем точки маршрута
-    for (let i = 0; i < this.#points.length; i++) {
-      const pointOffers = this.#getOffersForPoint(this.#points[i]);
-      const pointDestination = this.#wayPointsModel.getDestination(this.#points[i]);
-      render(new PointView({ point: this.#points[i], offers: pointOffers, destination: pointDestination }), listContainer);
-
-      render(new EditFormView(
-        {
-          point: this.#points[i],
-          offers: this.#wayPointsModel.getEvents(),
-          destinationsList: this.#wayPointsModel.getDestinations(),
-        }), listContainer);
-
-    }
+    this.#points.forEach((point) => {
+      const presenter = new PointPresenter({pointsModel: this.#wayPointsModel, container: listContainer});
+      presenter.init(
+        point
+      );
+    });
   }
 }
