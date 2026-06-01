@@ -2,16 +2,19 @@ import { render } from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
 import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
-import EditFormView from '../view/edit-form-view.js';
-import PointView from '../view/point-view.js';
+import EmptyList from '../view/list-empty-view.js';
+import PointPresenter from './point-presenter.js';
+import { FilterType, SortType } from '../const.js';
 
-const RANDOM_POINT = 0;
+
 export default class BoardPresenter {
   #infoContainer = {};
   #filterContainer = {};
   #sortContainer = {};
   #wayPointsModel = {};
-  #points = {};
+  #points = [];
+  #currentFilter = FilterType.EVERYTHING;
+  #currentSort = SortType.DAY;
 
   constructor({ infoContainer, filterContainer, sortContainer, wayPointsModel }) {
     this.#infoContainer = infoContainer;
@@ -20,49 +23,108 @@ export default class BoardPresenter {
     this.#wayPointsModel = wayPointsModel;
   }
 
-  #getOffersForPoint = (point) => {
-    const eventData = this.#wayPointsModel.getEventByType(point.type);
-
-    return point.offers
-      .map((offerId) => eventData.offers.find((o) => o.id === offerId))
-      .filter(Boolean); // на случай, если id нет
-  };
-
   init() {
     // Рендер информации о маршруте
     render(new InfoView(), this.#infoContainer, 'afterbegin');
 
     // Рендер фильтров
-    render(new FilterView(), this.#filterContainer);
+    render(
+      new FilterView({
+        onFilterChange: this.#handleFilterChange
+      }),
+      this.#filterContainer
+    );
 
     // Рендер сортировки
-    render(new SortView(), this.#sortContainer);
+    render(
+      new SortView({
+        onSortChange: this.#handleSortChange
+      }), this.#sortContainer);
 
-    // Создаём контейнер списка
-    const listContainer = document.createElement('ul');
-    listContainer.classList.add('trip-events__list');
-    this.#sortContainer.append(listContainer);
+    this.#renderPointsList();
+  }
 
-    this.#points = this.#wayPointsModel.getPoints();
+  #handleFilterChange = (filterType) => {
+    this.#currentFilter = filterType;
+    this.#currentSort = SortType.DAY; // сброс сортировки
+    this.#clearPointsList();
+    this.#renderPointsList();
+  };
 
-    // Форма редактирования — первая в списке
-    const editPoint = this.#points[RANDOM_POINT];
-    const allTypeOffers = this.#wayPointsModel.getEventByType(editPoint.type);
-    const editDestination = this.#wayPointsModel.getDestination(editPoint);
-    render(new EditFormView(
-      {
-        point: editPoint,
-        allOffers: allTypeOffers.offers,
-        destination: editDestination
-      }), listContainer);
+  #handleSortChange = (sortType) => {
+    this.#currentSort = sortType;
+    this.#clearPointsList();
+    this.#renderPointsList();
+  };
 
-    // Создаем точки маршрута
-    for (let i = 0; i < this.#points.length; i++) {
-      const offers = this.#getOffersForPoint(this.#points[i]);
-      const destination = this.#wayPointsModel.getDestination(this.#points[i]);
-      render(new PointView({ point: this.#points[i], offers: offers, destination: destination }), listContainer);
+  #getFilteredPoints() {
+    const points = this.#wayPointsModel.getPoints();
+    const now = new Date();
+
+    switch (this.#currentFilter) {
+      case FilterType.FUTURE:
+        return points.filter((p) => new Date(p.dateFrom) > now);
+
+      case FilterType.PRESENT:
+        return points.filter((p) =>
+          new Date(p.dateFrom) <= now && new Date(p.dateTo) >= now
+        );
+
+      case FilterType.PAST:
+        return points.filter((p) => new Date(p.dateTo) < now);
+
+      default:
+        return points;
     }
+  }
 
+  #getSortedPoints(points) {
+    switch (this.#currentSort) {
+      case SortType.PRICE:
+        return [...points].sort((a, b) => b.basePrice - a.basePrice);
 
+      case SortType.TIME:
+        return [...points].sort((a, b) => {
+          const durationA = new Date(a.dateTo) - new Date(a.dateFrom);
+          const durationB = new Date(b.dateTo) - new Date(b.dateFrom);
+          return durationB - durationA;
+        });
+
+      default: // DAY
+        return [...points].sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
+    }
+  }
+
+  #clearPointsList() {
+    const list = this.#sortContainer.querySelector('.trip-events__list');
+    const message = this.#sortContainer.querySelector('.trip-events__msg');
+    if (list) {
+      list.remove();
+    }
+    if (message) {
+      message.remove();
+    }
+  }
+
+  #renderPointsList() {
+    const filteredPoints = this.#getFilteredPoints();
+    if(filteredPoints.length > 0){
+
+      // Создаём контейнер списка
+      const listContainer = document.createElement('ul');
+      listContainer.classList.add('trip-events__list');
+      this.#sortContainer.append(listContainer);
+
+      // Создаём точки
+      this.#points = this.#getSortedPoints(filteredPoints);
+      this.#points.forEach((point) => {
+        const presenter = new PointPresenter({ pointsModel: this.#wayPointsModel, container: listContainer });
+        presenter.init(
+          point
+        );
+      });
+    } else {
+      render (new EmptyList(this.#currentFilter), this.#sortContainer);
+    }
   }
 }

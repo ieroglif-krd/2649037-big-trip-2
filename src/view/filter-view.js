@@ -33,6 +33,19 @@ function createFilterTemplate() {
 }
 
 export default class FilterView extends AbstractView {
+  #handleFilterChange = null;
+
+  constructor({ onFilterChange }) {
+    super();
+    this.#handleFilterChange = onFilterChange;
+
+    this.element.addEventListener('change', (evt) => {
+      if (evt.target.name === 'trip-filter') {
+        this.#handleFilterChange(evt.target.value);
+      }
+    });
+  }
+
   get template() {
     return createFilterTemplate();
   }

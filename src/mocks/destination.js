@@ -2,7 +2,7 @@ const destinations = [
   {
     id: 'city-1',
     name: 'Токио',
-    description: 'Токио — огромный мегаполис, где ультрасовременные районы соседствуют с древними храмами.',
+    description: '',
     pictures: [
       {
         src: 'https://images.unsplash.com/photo-1505060895085-774b0b41b6c7?w=330',

@@ -25,5 +25,17 @@ export default class WayPointsModel {
     return events;
   }
 
+  getDestinations() {
+    return destinations;
+  }
+
+  getOffersForPoint = (point) => {
+    const eventData = this.getEventByType(point.type);
+
+    return point.offers
+      .map((offerId) => eventData.offers.find((o) => o.id === offerId))
+      .filter(Boolean); // на случай, если id нет
+  };
+
 }
 
