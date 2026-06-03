@@ -17,7 +17,7 @@ export default class WayPointsModel {
 
   // находим название города по ID
   getDestination (point){
-    const destination = destinations.find((destination) => destination.id === point.destination);
+    const destination = destinations.find((currentDestination) => currentDestination.id === point.destination);
     return destination ? destination.name : '';
   }
 
