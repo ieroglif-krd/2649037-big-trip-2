@@ -1,20 +1,26 @@
-import { render } from '../framework/render.js';
+import { render, remove } from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
 import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
 import EmptyList from '../view/list-empty-view.js';
 import PointPresenter from './point-presenter.js';
 import { FilterType, SortType } from '../const.js';
+import { updateItem } from '../utils.js';
 
 
 export default class BoardPresenter {
   #infoContainer = {};
   #filterContainer = {};
   #sortContainer = {};
+
   #wayPointsModel = {};
   #points = [];
+
   #currentFilter = FilterType.EVERYTHING;
   #currentSort = SortType.DAY;
+
+  #pointPresenters = new Map();
+  #message = null;
 
   constructor({ infoContainer, filterContainer, sortContainer, wayPointsModel }) {
     this.#infoContainer = infoContainer;
@@ -44,6 +50,10 @@ export default class BoardPresenter {
     this.#renderPointsList();
   }
 
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
   #handleFilterChange = (filterType) => {
     this.#currentFilter = filterType;
     this.#currentSort = SortType.DAY; // сброс сортировки
@@ -57,21 +67,26 @@ export default class BoardPresenter {
     this.#renderPointsList();
   };
 
+  #handlePointChange = (updatedPoint) => {
+    this.#points = updateItem(this.#points, updatedPoint);
+    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
+  };
+
   #getFilteredPoints() {
     const points = this.#wayPointsModel.getPoints();
     const now = new Date();
 
     switch (this.#currentFilter) {
       case FilterType.FUTURE:
-        return points.filter((p) => new Date(p.dateFrom) > now);
+        return points.filter((point) => new Date(point.dateFrom) > now);
 
       case FilterType.PRESENT:
-        return points.filter((p) =>
-          new Date(p.dateFrom) <= now && new Date(p.dateTo) >= now
+        return points.filter((point) =>
+          new Date(point.dateFrom) <= now && new Date(point.dateTo) >= now
         );
 
       case FilterType.PAST:
-        return points.filter((p) => new Date(p.dateTo) < now);
+        return points.filter((point) => new Date(point.dateTo) < now);
 
       default:
         return points;
@@ -81,33 +96,32 @@ export default class BoardPresenter {
   #getSortedPoints(points) {
     switch (this.#currentSort) {
       case SortType.PRICE:
-        return [...points].sort((a, b) => b.basePrice - a.basePrice);
+        return [...points].sort((pointA, pointB) => pointB.basePrice - pointA.basePrice);
 
       case SortType.TIME:
-        return [...points].sort((a, b) => {
-          const durationA = new Date(a.dateTo) - new Date(a.dateFrom);
-          const durationB = new Date(b.dateTo) - new Date(b.dateFrom);
+        return [...points].sort((pointA, pointB) => {
+          const durationA = new Date(pointA.dateTo) - new Date(pointA.dateFrom);
+          const durationB = new Date(pointB.dateTo) - new Date(pointB.dateFrom);
           return durationB - durationA;
         });
 
       default: // DAY
-        return [...points].sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom));
+        return [...points].sort((pointA, pointB) => new Date(pointA.dateFrom) - new Date(pointB.dateFrom));
     }
   }
 
   #clearPointsList() {
-    const list = this.#sortContainer.querySelector('.trip-events__list');
-    const message = this.#sortContainer.querySelector('.trip-events__msg');
-    if (list) {
-      list.remove();
-    }
-    if (message) {
-      message.remove();
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+    if (this.#message) {
+      remove(this.#message);
+      this.#message = null;
     }
   }
 
   #renderPointsList() {
     const filteredPoints = this.#getFilteredPoints();
+
     if(filteredPoints.length > 0){
 
       // Создаём контейнер списка
@@ -118,13 +132,20 @@ export default class BoardPresenter {
       // Создаём точки
       this.#points = this.#getSortedPoints(filteredPoints);
       this.#points.forEach((point) => {
-        const presenter = new PointPresenter({ pointsModel: this.#wayPointsModel, container: listContainer });
+        const presenter = new PointPresenter({
+          pointsModel: this.#wayPointsModel,
+          container: listContainer,
+          onDataChange: this.#handlePointChange,
+          onModeChange: this.#handleModeChange
+        });
         presenter.init(
           point
         );
+        this.#pointPresenters.set(point.id, presenter);
       });
     } else {
-      render (new EmptyList(this.#currentFilter), this.#sortContainer);
+      this.#message = new EmptyList(this.#currentFilter);
+      render(this.#message, this.#sortContainer);
     }
   }
 }

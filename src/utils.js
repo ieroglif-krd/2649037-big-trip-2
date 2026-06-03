@@ -20,5 +20,10 @@ function getRandomOffers(offers) {
 
 }
 
+const isEsc = (evt) => evt.key === 'Escape';
 
-export { getRandomNumber, getRandomOffers };
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
+
+export { getRandomNumber, getRandomOffers, isEsc, updateItem };

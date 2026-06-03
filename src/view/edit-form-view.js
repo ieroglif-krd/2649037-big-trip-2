@@ -12,7 +12,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
   } = point;
 
   // Находим объект destination по ID
-  const destination = destinationsList.find((d) => d.id === destinationId);
+  const destination = destinationsList.find((currentDestination) => currentDestination.id === destinationId);
   const destinationName = destination ? destination.name : '';
   const destinationDescription = destination ? destination.description : '';
   const destinationSection = destinationDescription
@@ -32,7 +32,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
   const end = formatForInput(dateTo);
 
   // Генерация списка офферов
-  const eventForType = allOffers.find((e) => e.type === type);
+  const eventForType = allOffers.find((offer) => offer.type === type);
   const offersForType = eventForType ? eventForType.offers : [];
   const offersTemplate = offersForType.map((offer) => {
     const isChecked = selectedOfferIds.includes(offer.id);
@@ -55,7 +55,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
 
   // Генерация списка городов
   const destinationsOptions = destinationsList
-    .map((d) => `<option value="${d.name}"></option>`)
+    .map((currentDestination) => `<option value="${currentDestination.name}"></option>`)
     .join('');
 
   return `
@@ -75,14 +75,14 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
               <legend class="visually-hidden">Event type</legend>
 
               ${['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant']
-    .map((t) => `
+    .map((typeName) => `
                   <div class="event__type-item">
-                    <input id="event-type-${t}-1"
+                    <input id="event-type-${typeName}-1"
                       class="event__type-input visually-hidden"
-                      type="radio" name="event-type" value="${t}"
-                      ${t === type ? 'checked' : ''}>
-                    <label class="event__type-label event__type-label--${t}"
-                      for="event-type-${t}-1">${t[0].toUpperCase() + t.slice(1)}</label>
+                      type="radio" name="event-type" value="${typeName}"
+                      ${typeName === type ? 'checked' : ''}>
+                    <label class="event__type-label event__type-label--${typeName}"
+                      for="event-type-${typeName}-1">${typeName[0].toUpperCase() + typeName.slice(1)}</label>
                   </div>
                 `).join('')}
             </fieldset>

@@ -12,12 +12,12 @@ export default class WayPointsModel {
 
   // находим все предложения для переданного типа.
   getEventByType(type) {
-    return events.find((e) => e.type === type);
+    return events.find((event) => event.type === type);
   }
 
   // находим название города по ID
   getDestination (point){
-    const destination = destinations.find((d) => d.id === point.destination);
+    const destination = destinations.find((currentDestination) => currentDestination.id === point.destination);
     return destination ? destination.name : '';
   }
 
@@ -33,7 +33,7 @@ export default class WayPointsModel {
     const eventData = this.getEventByType(point.type);
 
     return point.offers
-      .map((offerId) => eventData.offers.find((o) => o.id === offerId))
+      .map((offerId) => eventData.offers.find((offer) => offer.id === offerId))
       .filter(Boolean); // на случай, если id нет
   };
 
