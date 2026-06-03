@@ -14,6 +14,7 @@ export default class BoardPresenter {
   #sortContainer = {};
 
   #wayPointsModel = {};
+  #originalPoints = [];
   #points = [];
 
   #currentFilter = FilterType.EVERYTHING;
@@ -31,6 +32,8 @@ export default class BoardPresenter {
   }
 
   init() {
+    this.#originalPoints = this.#wayPointsModel.getPoints();
+
     // Рендер информации о маршруте
     render(new InfoView(), this.#infoContainer, 'afterbegin');
 
@@ -45,7 +48,7 @@ export default class BoardPresenter {
   }
 
   #getFilteredPoints() {
-    const points = this.#wayPointsModel.getPoints();
+    const points = this.#originalPoints;
     const now = new Date();
 
     switch (this.#currentFilter) {
@@ -140,7 +143,7 @@ export default class BoardPresenter {
   };
 
   #handlePointChange = (updatedPoint) => {
-    this.#points = updateItem(this.#points, updatedPoint);
+    this.#originalPoints = updateItem(this.#originalPoints, updatedPoint);
     this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
   };
 }
