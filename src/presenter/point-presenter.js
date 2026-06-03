@@ -86,4 +86,9 @@ export default class PointPresenter {
   #handleRollupClick = () => {
     this.#replaceFormToCard();
   };
+
+  destroy() {
+    remove(this.#pointComponent);
+    remove(this.#pointEditComponent);
+  }
 }

@@ -15,6 +15,7 @@ export default class BoardPresenter {
   #points = [];
   #currentFilter = FilterType.EVERYTHING;
   #currentSort = SortType.DAY;
+  #pointPresenters = new Map();
 
   constructor({ infoContainer, filterContainer, sortContainer, wayPointsModel }) {
     this.#infoContainer = infoContainer;
@@ -96,11 +97,11 @@ export default class BoardPresenter {
   }
 
   #clearPointsList() {
-    const list = this.#sortContainer.querySelector('.trip-events__list');
+    //const list = this.#sortContainer.querySelector('.trip-events__list');
     const message = this.#sortContainer.querySelector('.trip-events__msg');
-    if (list) {
-      list.remove();
-    }
+
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
     if (message) {
       message.remove();
     }
@@ -123,6 +124,7 @@ export default class BoardPresenter {
         presenter.init(
           point
         );
+        this.#pointPresenters.set(point.id, presenter);
       });
     } else {
       render (new EmptyList(this.#currentFilter), this.#sortContainer);

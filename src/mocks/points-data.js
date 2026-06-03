@@ -2,6 +2,7 @@ import { POINTS_COUNT, DATA_DATES } from '../const.js';
 import { getRandomNumber, getRandomOffers } from '../utils.js';
 import { destinations } from './destination.js';
 import { events } from './offers-data.js';
+import { nanoid } from 'nanoid';
 
 
 const lastDate = new Date(DATA_DATES.START);
@@ -9,7 +10,7 @@ const lastDate = new Date(DATA_DATES.START);
 //получаем предложения
 const eventsTypes = events.map((event) => event.type);
 
-const point = (index) => {
+const point = () => {
   // задаем начальную дату
   const dateFrom = new Date(lastDate);
 
@@ -30,7 +31,7 @@ const point = (index) => {
   const eventData = events.find((event) => event.type === eventType);
 
   return {
-    id: index,
+    id: nanoid(),
     basePrice: getRandomNumber(),
     dateFrom: dateFrom.toISOString(),
     dateTo: dateTo.toISOString(),
@@ -44,7 +45,7 @@ const point = (index) => {
 const createPoints = () => {
   const points = [];
   for (let i = 0; i < POINTS_COUNT; i++) {
-    points.push(point(i));
+    points.push(point());
   }
   return points;
 };
