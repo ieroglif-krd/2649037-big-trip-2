@@ -108,6 +108,7 @@ export default class BoardPresenter {
 
   #renderPointsList() {
     const filteredPoints = this.#getFilteredPoints();
+
     if(filteredPoints.length > 0){
 
       // Создаём контейнер списка

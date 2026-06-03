@@ -20,5 +20,6 @@ function getRandomOffers(offers) {
 
 }
 
+const isEsc = (evt) => evt.key === 'Escape';
 
-export { getRandomNumber, getRandomOffers };
+export { getRandomNumber, getRandomOffers, isEsc };

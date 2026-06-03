@@ -1,12 +1,13 @@
 import PointView from '../view/point-view.js';
 import EditFormView from '../view/edit-form-view.js';
-import { render, replace } from '../framework/render.js';
+import { render, replace, remove } from '../framework/render.js';
+import { isEsc } from '../utils.js';
 
 
 export default class PointPresenter {
   #pointComponent = null;
   #pointEditComponent = null;
-  #container = null;
+  #pointsListContainer = null;
   #point = null;
   #allEvents = null;
   #destinationsList = null;
@@ -14,12 +15,14 @@ export default class PointPresenter {
 
   constructor({pointsModel, container}) {
     this.#pointsModel = pointsModel;
-    this.#container = container;
+    this.#pointsListContainer = container;
 
   }
 
   init(point) {
     this.#point = point;
+    const prevPointComponent = this.#pointComponent;
+    const prevPointEditComponent = this.#pointEditComponent;
 
     this.#pointComponent = new PointView({
       point,
@@ -36,7 +39,23 @@ export default class PointPresenter {
       onRollupClick: this.#handleRollupClick
     });
 
-    render(this.#pointComponent, this.#container);
+    if (prevPointComponent === null || prevPointEditComponent === null) {
+      render(this.#pointComponent, this.#pointsListContainer);
+      return;
+    }
+
+    // Проверка на наличие в DOM необходима,
+    // чтобы не пытаться заменить то, что не было отрисовано
+    if (this.#pointsListContainer.contains(prevPointComponent.element)) {
+      replace(this.#pointComponent, prevPointComponent);
+    }
+
+    if (this.#pointsListContainer.contains(prevPointEditComponent.element)) {
+      replace(this.#pointEditComponent, prevPointEditComponent);
+    }
+
+    remove(prevPointComponent);
+    remove(prevPointEditComponent);
   }
 
   #replaceCardToForm = () => {
@@ -50,7 +69,7 @@ export default class PointPresenter {
   };
 
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape') {
+    if (isEsc(evt)) {
       evt.preventDefault();
       this.#replaceFormToCard();
     }
