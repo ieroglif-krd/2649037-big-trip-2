@@ -1,4 +1,4 @@
-import { render } from '../framework/render.js';
+import { render, remove } from '../framework/render.js';
 import FilterView from '../view/filter-view.js';
 import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
@@ -16,6 +16,7 @@ export default class BoardPresenter {
   #currentFilter = FilterType.EVERYTHING;
   #currentSort = SortType.DAY;
   #pointPresenters = new Map();
+  #message = null;
 
   constructor({ infoContainer, filterContainer, sortContainer, wayPointsModel }) {
     this.#infoContainer = infoContainer;
@@ -97,13 +98,10 @@ export default class BoardPresenter {
   }
 
   #clearPointsList() {
-    //const list = this.#sortContainer.querySelector('.trip-events__list');
-    const message = this.#sortContainer.querySelector('.trip-events__msg');
-
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
-    if (message) {
-      message.remove();
+    if (this.message) {
+      remove(this.message);
     }
   }
 
@@ -127,7 +125,8 @@ export default class BoardPresenter {
         this.#pointPresenters.set(point.id, presenter);
       });
     } else {
-      render (new EmptyList(this.#currentFilter), this.#sortContainer);
+      this.message = new EmptyList(this.#currentFilter);
+      render (this.message, this.#sortContainer);
     }
   }
 }
