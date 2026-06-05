@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import dayjs from 'dayjs';
 
 function createEditFormTemplate(point, allOffers, destinationsList) {
@@ -75,7 +75,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
               <legend class="visually-hidden">Event type</legend>
 
               ${['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant']
-    .map((typeName) => `
+      .map((typeName) => `
                   <div class="event__type-item">
                     <input id="event-type-${typeName}-1"
                       class="event__type-input visually-hidden"
@@ -147,33 +147,38 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
 }
 
 
-export default class EditFormView extends AbstractView {
-  #point;
+export default class EditFormView extends AbstractStatefulView {
   #allOffers;
   #destinationsList;
   #onFormSubmit;
   #onRollupClick;
 
-  constructor({ point, offers, destinationsList, onFormSubmit, onRollupClick}) {
+  constructor({ point, offers, destinationsList, onFormSubmit, onRollupClick }) {
     super();
-    this.#point = point;
+    this._setState(point);
     this.#allOffers = offers;
     this.#destinationsList = destinationsList;
     this.#onFormSubmit = onFormSubmit;
     this.#onRollupClick = onRollupClick;
 
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#onRollupClickHandler);
+    this._restoreHandlers();
 
-    this.element.addEventListener('submit', this.#onFormSubmitHandler);
   }
 
   get template() {
     return createEditFormTemplate(
-      this.#point,
+      this._state,
       this.#allOffers,
       this.#destinationsList
     );
+  }
+
+  _restoreHandlers() {
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#onRollupClickHandler);
+    this.element.addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__type-list')
+      .addEventListener('change', this.#eventTypeChangeHandler);
   }
 
   #onRollupClickHandler = (evt) => {
@@ -181,9 +186,16 @@ export default class EditFormView extends AbstractView {
     this.#onRollupClick();
   };
 
-  #onFormSubmitHandler = (evt) => {
+  #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#onFormSubmit();
   };
 
+  #eventTypeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      type: evt.target.value
+    });
+
+  };
 }
