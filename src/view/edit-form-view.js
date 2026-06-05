@@ -194,7 +194,7 @@ export default class EditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#onFormSubmit();
+    this.#onFormSubmit(EditFormView.parseStateToPoint(this._state));
   };
 
   #eventTypeChangeHandler = (evt) => {
