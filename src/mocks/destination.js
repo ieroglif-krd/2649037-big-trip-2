@@ -3,20 +3,7 @@ const destinations = [
     id: 'city-1',
     name: 'Токио',
     description: '',
-    pictures: [
-      {
-        src: 'https://images.unsplash.com/photo-1505060895085-774b0b41b6c7?w=330',
-        description: 'Токийская башня на фоне ночного города'
-      },
-      {
-        src: 'https://images.unsplash.com/photo-1504805572947-34fad45aed93?w=330',
-        description: 'Перекрёсток Сибуя вечером'
-      },
-      {
-        src: 'https://images.unsplash.com/photo-1526481280695-3c720685208b?w=330',
-        description: 'Улицы Токио с неоновыми вывесками'
-      }
-    ]
+    pictures: []
   },
   {
     id: 'city-2',
@@ -28,8 +15,16 @@ const destinations = [
         description: 'Тории храма Фусими Инари'
       },
       {
-        src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=330',
+        src: '/img/photos/4.jpg',
         description: 'Традиционный район Гион'
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=330',
+        description: 'Сад при старом храме'
+      },
+      {
+        src: '/img/photos/5.jpg',
+        description: 'Улица с деревянными домами и фонарями'
       }
     ]
   },
@@ -43,8 +38,16 @@ const destinations = [
         description: 'Осакский замок в окружении зелени'
       },
       {
-        src: 'https://images.unsplash.com/photo-1554797589-7241bb691973?w=330',
+        src: '/img/photos/1.jpg',
         description: 'Улицы района Дотонбори'
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1554797589-7241bb691973?w=330',
+        description: 'Гастрономический уличный рынок'
+      },
+      {
+        src: '/img/photos/2.jpg',
+        description: 'Современные небоскрёбы и огни'
       }
     ]
   },
@@ -54,15 +57,15 @@ const destinations = [
     description: 'Йокогама — современный портовый город с футуристическим районом Минато‑Мираи.',
     pictures: [
       {
-        src: 'https://images.unsplash.com/photo-1578632292335-df3b1b1b1b1b?w=330',
+        src: 'https://images.unsplash.com/photo-1503891450247-ee5f8ec46dc3?w=330',
         description: 'Скайлайн Йокогамы'
       },
       {
-        src: 'https://images.unsplash.com/photo-1526483360412-f4dbaf036963?w=330',
+        src: '/img/photos/3.jpg',
         description: 'Колесо обозрения Cosmo Clock 21'
       },
       {
-        src: 'https://images.unsplash.com/photo-1503891450247-ee5f8ec46dc3?w=330',
+        src: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=330',
         description: 'Порт Йокогамы'
       }
     ]
@@ -71,25 +74,24 @@ const destinations = [
     id: 'city-5',
     name: 'Саппоро',
     description: 'Саппоро — столица Хоккайдо, известная снежным фестивалем.',
-    pictures: [
-      {
-        src: 'https://images.unsplash.com/photo-1549692520-acc6669e2f0c?w=330',
-        description: 'Зимний Саппоро'
-      }
-    ]
+    pictures: []
   },
   {
     id: 'city-6',
     name: 'Нара',
-    description: 'Нара — древняя столица, где по улицам свободно гуляют олени.',
+    description: '',
     pictures: [
       {
         src: 'https://images.unsplash.com/photo-1554797589-7241bb691973?w=330',
         description: 'Олень в парке Нара'
       },
       {
-        src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=330',
+        src: '/img/photos/5.jpg',
         description: 'Традиционная архитектура Нары'
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=330',
+        description: 'Аллея с древними храмами'
       }
     ]
   },
@@ -103,7 +105,7 @@ const destinations = [
         description: 'Мемориальный парк мира'
       },
       {
-        src: 'https://images.unsplash.com/photo-1503891450247-ee5f8ec46dc3?w=330',
+        src: '/img/photos/1.jpg',
         description: 'Вид на город Хиросима'
       }
     ]

@@ -12,26 +12,30 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
   } = point;
 
   // Находим объект destination по ID
-  const destination = destinationsList.find((currentDestination) => currentDestination.id === destinationId);
-  const destinationName = destination ? destination.name : '';
-  const destinationDescription = destination ? destination.description : '';
+  const destination = destinationsList.find((d) => d.id === destinationId);
+  const {
+    name: destinationName = '',
+    description: destinationDescription = '',
+    pictures: destinationPictures = []
+  } = destination || {};
+
   const destinationSection = destinationDescription
     ? `
     <section class="event__section event__section--destination">
       <h3 class="event__section-title event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">
-        ${destinationDescription}
-      </p>
+      <p class="event__destination-description">${destinationDescription}</p>
     </section>
   `
     : '';
+
+  const destinationPhotosSection = createPhotosTemplate();
 
   // Форматирование дат
   const formatForInput = (date) => dayjs(date).format('DD/MM/YY HH:mm');
   const start = formatForInput(dateFrom);
   const end = formatForInput(dateTo);
 
-  // Генерация списка офферов
+  // Генерация списка услуг
   const eventForType = allOffers.find((offer) => offer.type === type);
   const offersForType = eventForType ? eventForType.offers : [];
   const offersTemplate = offersForType.map((offer) => {
@@ -58,6 +62,25 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
     .map((currentDestination) => `<option value="${currentDestination.name}"></option>`)
     .join('');
 
+  // Генерация фотографий
+  function createPhotosTemplate() {
+    if (!destinationPictures || destinationPictures.length === 0) {
+      return '';
+    }
+
+    const photosMarkup = destinationPictures
+      .map((photo) => `<img class="event__photo" src="${photo.src}" alt="${photo.description}">`)
+      .join('');
+
+    return `
+    <div class="event__photos-container">
+      <div class="event__photos-tape">
+        ${photosMarkup}
+      </div>
+    </div>
+  `;
+  }
+
   return `
     <form class="event event--edit" action="#" method="post" autocomplete="off">
       <header class="event__header">
@@ -75,7 +98,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
               <legend class="visually-hidden">Event type</legend>
 
               ${['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant']
-      .map((typeName) => `
+    .map((typeName) => `
                   <div class="event__type-item">
                     <input id="event-type-${typeName}-1"
                       class="event__type-input visually-hidden"
@@ -141,6 +164,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
         </section>
 
         ${destinationSection}
+        ${destinationPhotosSection}
       </section>
     </form>
   `;
