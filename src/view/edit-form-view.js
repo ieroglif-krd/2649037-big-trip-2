@@ -75,7 +75,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
               <legend class="visually-hidden">Event type</legend>
 
               ${['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant']
-    .map((typeName) => `
+      .map((typeName) => `
                   <div class="event__type-item">
                     <input id="event-type-${typeName}-1"
                       class="event__type-input visually-hidden"
@@ -179,12 +179,19 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.addEventListener('submit', this.#formSubmitHandler);
     this.element.querySelector('.event__type-list')
       .addEventListener('change', this.#eventTypeChangeHandler);
+    this.element.querySelector('.event__input--destination')
+      .addEventListener('input', this.#destinationChangeHandler);
   }
 
   reset(point) {
     this.updateElement(
       EditFormView.parsePointToState(point)
     );
+  }
+
+  #getDestinationIdByName(name) {
+    const found = this.#destinationsList.find((d) => d.name === name);
+    return found ? found.id : null;
   }
 
   #onRollupClickHandler = (evt) => {
@@ -205,12 +212,22 @@ export default class EditFormView extends AbstractStatefulView {
 
   };
 
+  #destinationChangeHandler = (evt) => {
+    evt.preventDefault();
+    const name = evt.target.value;
+
+    this.updateElement({
+      destination: this.#getDestinationIdByName(name)
+    });
+  };
+
+
   static parsePointToState(point) {
-    return {...point};
+    return { ...point };
   }
 
   static parseStateToPoint(state) {
-    return {...state};
+    return { ...state };
   }
 
 
