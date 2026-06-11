@@ -23,7 +23,7 @@ const destinations = [
         description: 'Сад при старом храме'
       },
       {
-        src: '/img/photos/5.jpg',
+        src: './img/photos/5.jpg',
         description: 'Улица с деревянными домами и фонарями'
       }
     ]
@@ -38,7 +38,7 @@ const destinations = [
         description: 'Осакский замок в окружении зелени'
       },
       {
-        src: '/img/photos/1.jpg',
+        src: './img/photos/1.jpg',
         description: 'Улицы района Дотонбори'
       },
       {
@@ -46,7 +46,7 @@ const destinations = [
         description: 'Гастрономический уличный рынок'
       },
       {
-        src: '/img/photos/2.jpg',
+        src: './img/photos/2.jpg',
         description: 'Современные небоскрёбы и огни'
       }
     ]
@@ -61,7 +61,7 @@ const destinations = [
         description: 'Скайлайн Йокогамы'
       },
       {
-        src: '/img/photos/3.jpg',
+        src: './img/photos/3.jpg',
         description: 'Колесо обозрения Cosmo Clock 21'
       },
       {
@@ -86,7 +86,7 @@ const destinations = [
         description: 'Олень в парке Нара'
       },
       {
-        src: '/img/photos/5.jpg',
+        src: './img/photos/5.jpg',
         description: 'Традиционная архитектура Нары'
       },
       {
@@ -105,7 +105,7 @@ const destinations = [
         description: 'Мемориальный парк мира'
       },
       {
-        src: '/img/photos/1.jpg',
+        src: './img/photos/1.jpg',
         description: 'Вид на город Хиросима'
       }
     ]

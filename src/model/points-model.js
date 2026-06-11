@@ -1,12 +1,13 @@
 import { createPoints } from '../mocks/points-data.js';
 import { events } from '../mocks/offers-data.js';
 import { destinations } from '../mocks/destination.js';
+import Observable from '../framework/observable.js';
 
 
-export default class WayPointsModel {
+export default class WayPointsModel extends Observable {
   wayPoints = createPoints();
 
-  getPoints() {
+  get points() {
     return this.wayPoints;
   }
 

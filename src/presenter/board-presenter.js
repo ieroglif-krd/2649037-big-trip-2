@@ -31,8 +31,12 @@ export default class BoardPresenter {
     this.#wayPointsModel = wayPointsModel;
   }
 
+  get points() {
+    return this.#wayPointsModel.points;
+  }
+
   init() {
-    this.#originalPoints = this.#wayPointsModel.getPoints();
+    this.#originalPoints = this.#wayPointsModel.points;
 
     // Рендер информации о маршруте
     render(new InfoView(), this.#infoContainer, 'afterbegin');
