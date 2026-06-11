@@ -59,7 +59,6 @@ export default class BoardPresenter {
 
     // Рендер сортировки
     this.#renderSortView();
-    
     this.#renderPointsList();
   }
 
