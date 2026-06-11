@@ -27,4 +27,16 @@ const SortType = {
   TIME: 'sort-time'
 };
 
-export {PRICE, POINTS_COUNT, DATA_DATES, FilterType, SortType };
+const UserAction = {
+  UPDATE_TASK: 'UPDATE_TASK',
+  ADD_TASK: 'ADD_TASK',
+  DELETE_TASK: 'DELETE_TASK',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
+export {PRICE, POINTS_COUNT, DATA_DATES, FilterType, SortType, UserAction, UpdateType};

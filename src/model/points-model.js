@@ -5,10 +5,50 @@ import Observable from '../framework/observable.js';
 
 
 export default class WayPointsModel extends Observable {
-  wayPoints = createPoints();
+  #wayPoints = createPoints();
 
   get points() {
-    return this.wayPoints;
+    return this.#wayPoints;
+  }
+
+  updatePoint(updateType, update) {
+    const index = this.#wayPoints.findIndex((point) => point.id === update.id);
+
+    if (index === -1) {
+      throw new Error('Can\'t update unexacting point');
+    }
+
+    this.#wayPoints = [
+      ...this.#wayPoints.slice(0, index),
+      update,
+      ...this.#wayPoints.slice(index + 1),
+    ];
+
+    this._notify(updateType, update);
+  }
+
+  addPoint(updateType, update) {
+    this.#wayPoints = [
+      update,
+      ...this.#wayPoints,
+    ];
+
+    this._notify(updateType, update);
+  }
+
+  deletePoint(updateType, update) {
+    const index = this.#wayPoints.findIndex((point) => point.id === update.id);
+
+    if (index === -1) {
+      throw new Error('Can\'t delete unexacting point');
+    }
+
+    this.#wayPoints = [
+      ...this.#wayPoints.slice(0, index),
+      ...this.#wayPoints.slice(index + 1),
+    ];
+
+    this._notify(updateType);
   }
 
   // находим все предложения для переданного типа.

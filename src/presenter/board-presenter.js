@@ -10,6 +10,7 @@ export default class BoardPresenter {
   #infoContainer = {};
   #filterContainer = {};
   #sortContainer = {};
+  
 
   #wayPointsModel = {};
 
@@ -25,6 +26,8 @@ export default class BoardPresenter {
     this.#filterContainer = filterContainer;
     this.#sortContainer = sortContainer;
     this.#wayPointsModel = wayPointsModel;
+
+     this.#wayPointsModel.addObserver(this.#handleModelEvent);
   }
 
   get points() {
@@ -81,16 +84,27 @@ export default class BoardPresenter {
   //   }
   // }
 
-  #clearPointsList() {
+  #clearPointsList({resetSortType = false} = {}) {
+
+    const pointsCount = this.points.length;
+
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
+
+    remove(this.#sortContainer);
+  //  remove(this.#noTaskComponent);
     if (this.#message) {
       remove(this.#message);
       this.#message = null;
     }
+   
+      if (resetSortType) {
+      this.#currentSortType = SortType.DEFAULT;
+    }
   }
 
   #renderPointsList() {
+
     // const filteredPoints = this.#getFilteredPoints();
 
     // if(filteredPoints.length > 0){
@@ -104,7 +118,7 @@ export default class BoardPresenter {
       const presenter = new PointPresenter({
         pointsModel: this.#wayPointsModel,
         container: listContainer,
-        onDataChange: this.#handlePointChange,
+        onDataChange: this.#handleViewAction,
         onModeChange: this.#handleModeChange
       });
       presenter.init(
@@ -141,7 +155,24 @@ export default class BoardPresenter {
 
   };
 
-  #handlePointChange = (updatedPoint) => {
-    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
+ #handleModelEvent = (updateType, data) => {
+    console.log(updateType, data);
+    // В зависимости от типа изменений решаем, что делать:
+    switch (updateType) {
+      case UpdateType.PATCH:
+        // - обновить часть списка (например, когда поменялось описание)
+        this.#pointPresenters.get(data.id).init(data);
+        break;
+      case UpdateType.MINOR:
+        // - обновить список (например, когда задача ушла в архив)
+        this.#clearPointsList();
+        this.#renderPointsList();
+        break;
+      case UpdateType.MAJOR:
+        // - обновить всю доску (например, при переключении фильтра)
+        this.#clearPointsList({resetSortType: true});
+        this.#renderPointsList();
+        break;
+    }
   };
 }
