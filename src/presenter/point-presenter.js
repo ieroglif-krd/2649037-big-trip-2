@@ -48,6 +48,7 @@ export default class PointPresenter {
       destinationsList: this.#pointsModel.getDestinations(),
       onFormSubmit: this.#handleFormSubmit,
       onRollupClick: this.#handleRollupClick,
+      onDeleteClick: this.#handleDeleteClick
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
@@ -92,11 +93,11 @@ export default class PointPresenter {
     this.#replaceCardToForm();
   };
 
-  #handleFormSubmit = (updatedPoint) => {
+  #handleFormSubmit = (update) => {
     this.#handleDataChange(
       UserAction.UPDATE_TASK,
       UpdateType.MINOR,
-      updatedPoint
+      update,
     );
     this.#replaceFormToCard();
   };
@@ -111,6 +112,14 @@ export default class PointPresenter {
       UserAction.UPDATE_TASK,
       UpdateType.MINOR,
       {...this.#point, isFavorite: !this.#point.isFavorite},
+    );
+  };
+
+  #handleDeleteClick = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_TASK,
+      UpdateType.MINOR,
+      point,
     );
   };
 

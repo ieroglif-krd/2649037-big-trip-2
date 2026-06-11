@@ -4,13 +4,13 @@ import InfoView from '../view/info-view.js';
 import SortView from '../view/sort-view.js';
 import EmptyList from '../view/empty-list-view.js';
 import PointPresenter from './point-presenter.js';
-import { FilterType, SortType } from '../const.js';
+import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 
 export default class BoardPresenter {
   #infoContainer = {};
   #filterContainer = {};
   #sortContainer = {};
-  
+
 
   #wayPointsModel = {};
 
@@ -27,7 +27,7 @@ export default class BoardPresenter {
     this.#sortContainer = sortContainer;
     this.#wayPointsModel = wayPointsModel;
 
-     this.#wayPointsModel.addObserver(this.#handleModelEvent);
+    this.#wayPointsModel.addObserver(this.#handleModelEvent);
   }
 
   get points() {
@@ -84,21 +84,21 @@ export default class BoardPresenter {
   //   }
   // }
 
-  #clearPointsList({resetSortType = false} = {}) {
+  #clearPointsList({ resetSortType = false } = {}) {
 
-    const pointsCount = this.points.length;
+    // const pointsCount = this.points.length;
 
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
     remove(this.#sortContainer);
-  //  remove(this.#noTaskComponent);
+    //  remove(this.#noTaskComponent);
     if (this.#message) {
       remove(this.#message);
       this.#message = null;
     }
-   
-      if (resetSortType) {
+
+    if (resetSortType) {
       this.#currentSortType = SortType.DEFAULT;
     }
   }
@@ -155,8 +155,21 @@ export default class BoardPresenter {
 
   };
 
- #handleModelEvent = (updateType, data) => {
-    console.log(updateType, data);
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_TASK:
+        this.#wayPointsModel.updateTask(updateType, update);
+        break;
+      case UserAction.ADD_TASK:
+        this.#wayPointsModel.addTask(updateType, update);
+        break;
+      case UserAction.DELETE_TASK:
+        this.#wayPointsModel.deleteTask(updateType, update);
+        break;
+    }
+  };
+
+  #handleModelEvent = (updateType, data) => {
     // В зависимости от типа изменений решаем, что делать:
     switch (updateType) {
       case UpdateType.PATCH:
@@ -170,7 +183,7 @@ export default class BoardPresenter {
         break;
       case UpdateType.MAJOR:
         // - обновить всю доску (например, при переключении фильтра)
-        this.#clearPointsList({resetSortType: true});
+        this.#clearPointsList({ resetSortType: true });
         this.#renderPointsList();
         break;
     }

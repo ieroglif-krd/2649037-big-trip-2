@@ -177,18 +177,20 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
 export default class EditFormView extends AbstractStatefulView {
   #allOffers;
   #destinationsList;
-  #onFormSubmit;
-  #onRollupClick;
+  #handlerFormSubmit;
+  #handlerRollupClick;
   #startDatepicker = null;
   #endDatepicker = null;
+  #handleDeleteClick = null;
 
-  constructor({ point, offers, destinationsList, onFormSubmit, onRollupClick }) {
+  constructor({ point, offers, destinationsList, onFormSubmit, onRollupClick, onDeleteClick }) {
     super();
     this._setState(EditFormView.parsePointToState(point));
     this.#allOffers = offers;
     this.#destinationsList = destinationsList;
-    this.#onFormSubmit = onFormSubmit;
-    this.#onRollupClick = onRollupClick;
+    this.#handlerFormSubmit = onFormSubmit;
+    this.#handlerRollupClick = onRollupClick;
+    this.#handleDeleteClick = onDeleteClick;
 
     this._restoreHandlers();
 
@@ -210,6 +212,8 @@ export default class EditFormView extends AbstractStatefulView {
       .addEventListener('change', this.#eventTypeChangeHandler);
     this.element.querySelector('.event__input--destination')
       .addEventListener('input', this.#destinationChangeHandler);
+    this.element.querySelector('.event__reset-btn')
+      .addEventListener('click', this.#formDeleteHandler);
 
     this.#initDatepickers();
   }
@@ -256,12 +260,12 @@ export default class EditFormView extends AbstractStatefulView {
 
   #onRollupClickHandler = (evt) => {
     evt.preventDefault();
-    this.#onRollupClick();
+    this.#handlerRollupClick();
   };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#onFormSubmit(EditFormView.parseStateToPoint(this._state));
+    this.#handlerFormSubmit(EditFormView.parseStateToPoint(this._state));
   };
 
   #eventTypeChangeHandler = (evt) => {
@@ -279,6 +283,11 @@ export default class EditFormView extends AbstractStatefulView {
     this.updateElement({
       destination: this.#getDestinationIdByName(name)
     });
+  };
+
+  #formDeleteHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(EditFormView.parseStateToTask(this._state));
   };
 
 
