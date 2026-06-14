@@ -353,7 +353,6 @@ export default class EditFormView extends AbstractStatefulView {
     }
   };
 
-
   static parsePointToState(point) {
     return { ...point };
   }

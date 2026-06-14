@@ -30,7 +30,8 @@ export default class BoardPresenter {
   }
 
   get points() {
-    const sortedPoints = [...this.#wayPointsModel.points];
+    const filteredPoints = this.#getFilteredPoints();
+    const sortedPoints = [...filteredPoints];
     switch (this.#currentSortType) {
       case SortType.PRICE:
         return sortedPoints.sort((pointA, pointB) => pointB.basePrice - pointA.basePrice);
@@ -55,8 +56,7 @@ export default class BoardPresenter {
     // Рендер фильтров
     render(new FilterView({ onFilterChange: this.#handleFilterChange }), this.#filterContainer);
 
-    // Рендер сортировки
-    this.#renderSortView();
+
     this.#renderPointsList();
   }
 
@@ -83,10 +83,11 @@ export default class BoardPresenter {
 
   #renderSortView() {
     this.#sortView = new SortView({ onSortChange: this.#handleSortChange });
-    render(this.#sortView, this.#boardContainer);
+    render(this.#sortView, this.#boardContainer, 'afterbegin');
+
   }
 
-  #clearPointsList({ resetSortType = false } = {}) {
+  #clearPointsList(resetSortType = false) {
 
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
@@ -110,24 +111,35 @@ export default class BoardPresenter {
   }
 
   #renderPointsList() {
-    // Создаём контейнер списка
-    this.#listContainer = document.createElement('ul');
-    this.#listContainer.classList.add('trip-events__list');
-    this.#boardContainer.append(this.#listContainer);
 
-    // Создаём точки
-    this.points.forEach((point) => {
-      const presenter = new PointPresenter({
-        pointsModel: this.#wayPointsModel,
-        container: this.#listContainer,
-        onDataChange: this.#handleViewAction,
-        onModeChange: this.#handleModeChange
+    if (this.points.length !== 0) {
+
+      // Рендер сортировки
+      if(!this.#sortView) {
+        this.#renderSortView();
+      }
+
+      // Создаём контейнер списка
+      this.#listContainer = document.createElement('ul');
+      this.#listContainer.classList.add('trip-events__list');
+      this.#boardContainer.append(this.#listContainer);
+
+      // Создаём точки
+      this.points.forEach((point) => {
+        const presenter = new PointPresenter({
+          pointsModel: this.#wayPointsModel,
+          container: this.#listContainer,
+          onDataChange: this.#handleViewAction,
+          onModeChange: this.#handleModeChange
+        });
+        presenter.init(point);
+        this.#pointPresenters.set(point.id, presenter);
       });
-      presenter.init(
-        point
-      );
-      this.#pointPresenters.set(point.id, presenter);
-    });
+    } else {
+      this.#clearPointsList(true);
+      this.#renderEmptyList();
+
+    }
   }
 
   #renderEmptyList() {
@@ -142,7 +154,9 @@ export default class BoardPresenter {
   #handleFilterChange = (filterType) => {
     this.#currentFilter = filterType;
     this.#currentSortType = SortType.DAY;// сброс сортировки
-    this.#sortView.reset();
+    if (this.#sortView) {
+      this.#sortView.reset();
+    }
     this.#clearPointsList();
     this.#renderPointsList();
   };
@@ -186,7 +200,6 @@ export default class BoardPresenter {
       case UpdateType.MAJOR:
         // - обновить всю доску (например, при переключении фильтра)
         this.#clearPointsList({ resetSortType: true });
-        this.#renderSortView();
         this.#renderPointsList();
         break;
     }

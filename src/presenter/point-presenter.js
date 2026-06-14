@@ -42,8 +42,8 @@ export default class PointPresenter {
 
     this.#pointEditComponent = new EditFormView({
       point,
-      offers: this.#pointsModel.getEvents(),
-      destinationsList: this.#pointsModel.getDestinations(),
+      offers: this.#pointsModel.events,
+      destinationsList: this.#pointsModel.destinations,
       onFormSubmit: this.#handleFormSubmit,
       onRollupClick: this.#handleRollupClick,
       onDeleteClick: this.#handleDeleteClick
@@ -117,7 +117,7 @@ export default class PointPresenter {
 
   #handleFavoriteClick = () => {
     this.#handleDataChange(
-      UserAction.UPDATE_TASK,
+      UserAction.UPDATE_POINT,
       UpdateType.MINOR,
       { ...this.#point, isFavorite: !this.#point.isFavorite },
     );
@@ -125,7 +125,7 @@ export default class PointPresenter {
 
   #handleDeleteClick = (point) => {
     this.#handleDataChange(
-      UserAction.DELETE_TASK,
+      UserAction.DELETE_POINT,
       UpdateType.MINOR,
       point,
     );

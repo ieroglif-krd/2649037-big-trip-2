@@ -11,6 +11,14 @@ export default class WayPointsModel extends Observable {
     return this.#wayPoints;
   }
 
+  get events() {
+    return events;
+  }
+
+  get destinations() {
+    return destinations;
+  }
+
   updatePoint(updateType, update) {
     const index = this.#wayPoints.findIndex((point) => point.id === update.id);
 
@@ -62,13 +70,6 @@ export default class WayPointsModel extends Observable {
     return destination ? destination.name : '';
   }
 
-  getEvents() {
-    return events;
-  }
-
-  getDestinations() {
-    return destinations;
-  }
 
   getOffersForPoint = (point) => {
     const eventType = this.getEventByType(point.type);
