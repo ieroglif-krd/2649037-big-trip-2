@@ -1,7 +1,7 @@
 import AbstractPointFormView from './abstract-point-form-view.js';
 import dayjs from 'dayjs';
 
-function createEditFormTemplate(point, allOffers, destinationsList) {
+function createNewPointTemplate(point, allOffers, destinationsList) {
   const {
     type,
     dateFrom,
@@ -11,7 +11,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
     destination: destinationId
   } = point;
 
-  const destination = destinationsList.find((currentDestination) => currentDestination.id === destinationId) || {};
+  const destination = destinationsList.find((d) => d.id === destinationId) || {};
   const {
     name: destinationName = '',
     description: destinationDescription = '',
@@ -20,7 +20,7 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
 
   const format = (date) => dayjs(date).format('DD/MM/YY HH:mm');
 
-  const eventForType = allOffers.find((offer) => offer.type === type);
+  const eventForType = allOffers.find((o) => o.type === type);
   const offersForType = eventForType ? eventForType.offers : [];
 
   const offersTemplate = offersForType.map((offer) => `
@@ -47,8 +47,8 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
     ? `
       <div class="event__photos-container">
         <div class="event__photos-tape">
-          ${destinationPictures.map((picture) => `
-            <img class="event__photo" src="${picture.src}" alt="${picture.description}">
+          ${destinationPictures.map((p) => `
+            <img class="event__photo" src="${p.src}" alt="${p.description}">
           `).join('')}
         </div>
       </div>
@@ -71,14 +71,14 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
 
-              ${['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'].map((offerType) => `
+              ${['taxi','bus','train','ship','drive','flight','check-in','sightseeing','restaurant'].map((t) => `
                   <div class="event__type-item">
-                    <input id="event-type-${offerType}-1"
+                    <input id="event-type-${t}-1"
                       class="event__type-input visually-hidden"
-                      type="radio" name="event-type" value="${offerType}"
-                      ${type === offerType ? 'checked' : ''}>
-                    <label class="event__type-label event__type-label--${offerType}"
-                      for="event-type-${offerType}-1">${offerType[0].toUpperCase() + offerType.slice(1)}</label>
+                      type="radio" name="event-type" value="${t}"
+                      ${t === type ? 'checked' : ''}>
+                    <label class="event__type-label event__type-label--${t}"
+                      for="event-type-${t}-1">${t[0].toUpperCase() + t.slice(1)}</label>
                   </div>
                 `).join('')}
             </fieldset>
@@ -116,23 +116,17 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
         </div>
 
         <button class="event__save-btn btn btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
-
-        <button class="event__rollup-btn" type="button">
-          <span class="visually-hidden">Open event</span>
-        </button>
+        <button class="event__reset-btn" type="reset">Cancel</button>
 
       </header>
 
       <section class="event__details">
-        ${offersForType.length > 0 ? `
-  <section class="event__section event__section--offers">
-    <h3 class="event__section-title event__section-title--offers">Offers</h3>
-    <div class="event__available-offers">
-      ${offersTemplate}
-    </div>
-  </section>
-` : ''}
+        <section class="event__section event__section--offers">
+          <h3 class="event__section-title event__section-title--offers">Offers</h3>
+          <div class="event__available-offers">
+            ${offersTemplate}
+          </div>
+        </section>
 
         ${destinationDescription ? `
           <section class="event__section event__section--destination">
@@ -147,92 +141,32 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
 }
 
 
-export default class EditFormView extends AbstractPointFormView {
-  #allOffers;
-  #destinationsList;
-  #onFormSubmit;
-  #onRollupClick;
+export default class NewPointFormView extends AbstractPointFormView {
+  #onCancel;
 
-  constructor({ point, offers, destinationsList, onFormSubmit, onRollupClick }) {
-    super();
-    this._setState(EditFormView.parsePointToState(point));
+  constructor({ point, offers, destinationsList, onSubmit, onCancel }) {
+    super({ point, offers, destinationsList });
 
-    this.#allOffers = offers;
-    this.#destinationsList = destinationsList;
-    this.#onFormSubmit = onFormSubmit;
-    this.#onRollupClick = onRollupClick;
-
-    // this._restoreHandlers();
+    this.#onCancel = onCancel;
+    this.setSubmitHandler(onSubmit);
   }
 
   get template() {
-    return createEditFormTemplate(
+    return createNewPointTemplate(
       this._state,
-      this.#allOffers,
-      this.#destinationsList
+      this.offers,
+      this.destinations
     );
-  }
-
-  updateElement(update) {
-    super.updateElement(update);
-    this._restoreHandlers();
-  }
-
-  reset(point) {
-    this.updateElement(EditFormView.parsePointToState(point));
   }
 
   _restoreHandlers() {
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#onRollupClickHandler);
+    super._restoreHandlers();
 
-    this.element.addEventListener('submit', this.#formSubmitHandler);
-
-    this.element.querySelector('.event__type-list')
-      .addEventListener('change', this.#eventTypeChangeHandler);
-
-    this.element.querySelector('.event__input--destination')
-      .addEventListener('input', this.#destinationChangeHandler);
-
-    // ⬇⬇⬇ ВАЖНО: проверяем, существует ли секция офферов
-    const offersContainer = this.element.querySelector('.event__available-offers');
-    if (offersContainer) {
-      offersContainer.addEventListener('change', this._handleOffersChange.bind(this));
-    }
-
-    this.element.querySelector('.event__input--price')
-      .addEventListener('input', this._handlePriceChange.bind(this));
-
-
-    this._initDatepickers(
-      '#event-start-time-1',
-      '#event-end-time-1',
-      this._state,
-      (date) => this._setState({ dateFrom: date }),
-      (date) => this._setState({ dateTo: date })
-    );
+    this.element
+      .querySelector('.event__reset-btn')
+      ?.addEventListener('click', (evt) => {
+        evt.preventDefault();
+        this.#onCancel();
+      });
   }
-
-  #onRollupClickHandler = (evt) => {
-    evt.preventDefault();
-    this.#onRollupClick();
-  };
-
-  #formSubmitHandler = (evt) => {
-    evt.preventDefault();
-    this.#onFormSubmit(EditFormView.parseStateToPoint(this._state));
-  };
-
-  #eventTypeChangeHandler = (evt) => {
-    evt.preventDefault();
-    this.updateElement({ type: evt.target.value });
-  };
-
-  #destinationChangeHandler = (evt) => {
-    evt.preventDefault();
-    const name = evt.target.value;
-    const found = this.#destinationsList.find((d) => d.name === name);
-    this.updateElement({ destination: found?.id || null });
-  };
-
 }
