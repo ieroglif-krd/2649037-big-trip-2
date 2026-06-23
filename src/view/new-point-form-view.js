@@ -181,7 +181,6 @@ export default class NewPointFormView extends AbstractPointFormView {
 
     this._setState(POINT_EMPTY);
 
-    //this._restoreHandlers();
   }
 
   get template() {

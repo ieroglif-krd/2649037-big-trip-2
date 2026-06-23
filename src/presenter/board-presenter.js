@@ -225,13 +225,12 @@ export default class BoardPresenter {
   };
 
   #newPointClickHandler = () => {
-    if (this.#newPointPresenter !== null) {
-      return;
-    }
-
+    // 1. Закрываем ВСЕ формы редактирования
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+    // 2. Сброс фильтра и сортировки
     this.#sortView.reset();
     this.#filterView.reset();
-
+    // 3. Создание формы новой точки
     this.#newPointPresenter = new NewPointPresenter({
       container: this.#listContainer,
       offers: this.#wayPointsModel.events,
@@ -239,8 +238,8 @@ export default class BoardPresenter {
       onSubmit: this.#handleNewPointSubmit,
       onCancel: this.#handleNewPointCancel
     });
-
     this.#newPointPresenter.init();
+    //4. Отключаем кнопку "New event", чтобы нельзя было открыть две формы одновременно
     this.#newEventButton.disabled = true;
   };
 
@@ -250,7 +249,6 @@ export default class BoardPresenter {
       UpdateType.MINOR,
       newPoint
     );
-
     this.#destroyNewPointForm();
   };
 
@@ -262,10 +260,8 @@ export default class BoardPresenter {
     if (this.#newPointPresenter === null) {
       return;
     }
-
     this.#newPointPresenter.destroy();
     this.#newPointPresenter = null;
-
     this.#newEventButton.disabled = false;
   }
 }
