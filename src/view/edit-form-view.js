@@ -146,14 +146,14 @@ function createEditFormTemplate(point, allOffers, destinationsList) {
   `;
 }
 
-
 export default class EditFormView extends AbstractPointFormView {
   #allOffers;
   #destinationsList;
   #onFormSubmit;
   #onRollupClick;
+  #onDeleteClick;
 
-  constructor({ point, offers, destinationsList, onFormSubmit, onRollupClick }) {
+  constructor({ point, offers, destinationsList, onFormSubmit, onRollupClick, onDeleteClick }) {
     super();
     this._setState(EditFormView.parsePointToState(point));
 
@@ -161,7 +161,7 @@ export default class EditFormView extends AbstractPointFormView {
     this.#destinationsList = destinationsList;
     this.#onFormSubmit = onFormSubmit;
     this.#onRollupClick = onRollupClick;
-
+    this.#onDeleteClick = onDeleteClick;
   }
 
   get template() {
@@ -193,11 +193,16 @@ export default class EditFormView extends AbstractPointFormView {
     this.element.querySelector('.event__input--destination')
       .addEventListener('input', this.#destinationChangeHandler);
 
-    // ⬇⬇⬇ ВАЖНО: проверяем, существует ли секция офферов
+    //проверяем, существует ли секция предложений
     const offersContainer = this.element.querySelector('.event__available-offers');
     if (offersContainer) {
       offersContainer.addEventListener('change', this._handleOffersChange.bind(this));
     }
+
+    // DELETE
+    this.element.querySelector('.event__reset-btn')
+      .addEventListener('click', this.#formDeleteHandler);
+
 
     this.element.querySelector('.event__input--price')
       .addEventListener('input', this._handlePriceChange.bind(this));
@@ -233,5 +238,11 @@ export default class EditFormView extends AbstractPointFormView {
     const found = this.#destinationsList.find((d) => d.name === name);
     this.updateElement({ destination: found?.id || null });
   };
+
+  #formDeleteHandler = (evt) => {
+    evt.preventDefault();
+    this.#onDeleteClick(EditFormView.parseStateToPoint(this._state));
+  };
+
 
 }
