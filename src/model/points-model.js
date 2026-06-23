@@ -1,10 +1,11 @@
-import { events } from '../mocks/offers-data.js';
-import { destinations } from '../mocks/destination.js';
+
 import Observable from '../framework/observable.js';
 import { UpdateType } from '../const.js';
 
 export default class WayPointsModel extends Observable {
   #wayPoints = [];
+  #destinations = [];
+  #offers = [];
   #pointApiService = null;
 
   constructor({ pointApiService }) {
@@ -17,23 +18,34 @@ export default class WayPointsModel extends Observable {
   }
 
   get events() {
-    return events;
+    return this.#offers;
   }
 
   get destinations() {
-    return destinations;
+    return this.#destinations;
   }
+
 
   async init() {
     try {
-      const points = await this.#pointApiService.points;
+      const [points, offers, destinations] = await Promise.all([
+        this.#pointApiService.points,
+        this.#pointApiService.offers,
+        this.#pointApiService.destinations
+      ]);
+
       this.#wayPoints = points.map(this.#adaptToClient);
+      this.#offers = offers;
+      this.#destinations = destinations;
+
     } catch (err) {
       this.#wayPoints = [];
+      this.#offers = [];
+      this.#destinations = [];
     }
+
     this._notify(UpdateType.INIT);
   }
-
 
   updatePoint(updateType, update) {
     const index = this.#wayPoints.findIndex((point) => point.id === update.id);
@@ -85,12 +97,12 @@ export default class WayPointsModel extends Observable {
 
   // находим все предложения для переданного типа.
   getEventByType(type) {
-    return events.find((event) => event.type === type);
+    return this.#offers.find((event) => event.type === type);
   }
 
   // находим название города по ID
   getDestination(point) {
-    const destination = destinations.find((currentDestination) => currentDestination.id === point.destination);
+    const destination = this.#destinations.find((currentDestination) => currentDestination.id === point.destination);
     return destination ? destination.name : '';
   }
 

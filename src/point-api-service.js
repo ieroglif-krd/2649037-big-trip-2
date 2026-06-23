@@ -13,7 +13,15 @@ export default class PointApiService extends ApiService {
       .then(ApiService.parseResponse);
   }
 
- 
+  get destinations() {
+    return this._load({ url: 'destinations' })
+      .then(ApiService.parseResponse);
+  }
+
+  get offers() {
+    return this._load({ url: 'offers' })
+      .then(ApiService.parseResponse);
+  }
 
   async updatePoint(point) {
     const response = await this._load({
