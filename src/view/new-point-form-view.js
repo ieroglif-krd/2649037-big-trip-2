@@ -197,9 +197,10 @@ export default class NewPointFormView extends AbstractPointFormView {
 
     // DESTINATION
     this.element.querySelector('.event__input--destination')
-      .addEventListener('change', (event) => {
-        this._handleDestinationChange(event, this.#destinations);
+      .addEventListener('input', (evt) => {
+        this._handleDestinationChange(evt, this.#destinations);
       });
+
 
     // PRICE
     this.element.querySelector('.event__input--price')

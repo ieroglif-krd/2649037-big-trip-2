@@ -188,7 +188,10 @@ export default class EditFormView extends AbstractPointFormView {
       .addEventListener('change', this.#eventTypeChangeHandler);
 
     this.element.querySelector('.event__input--destination')
-      .addEventListener('input', this.#destinationChangeHandler);
+      .addEventListener('input', (evt) => {
+        this._handleDestinationChange(evt, this.#destinationsList);
+      });
+
 
     //проверяем, существует ли секция предложений
     const offersContainer = this.element.querySelector('.event__available-offers');
@@ -227,15 +230,6 @@ export default class EditFormView extends AbstractPointFormView {
   #eventTypeChangeHandler = (evt) => {
     evt.preventDefault();
     this.updateElement({ type: evt.target.value });
-  };
-
-  #destinationChangeHandler = (evt) => {
-    const destination = this.#destinationsList.find(
-      (currentDestination) => currentDestination.name === evt.target.value);
-    if(!destination){
-      return;
-    }
-    this.updateElement({ destination: destination.id});
   };
 
   #formDeleteHandler = (evt) => {

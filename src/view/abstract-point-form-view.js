@@ -80,11 +80,18 @@ export default class AbstractPointFormView extends AbstractStatefulView {
     this._setState({ offers: [...offersChecked]?.map((offer) => offer.value) });
   }
 
-  _handleDestinationChange(evt, list) {
-    evt.preventDefault();
-    const id = this._getDestinationIdByName(evt.target.value, list);
-    this.updateElement({ destination: id });
+  _handleDestinationChange(evt, destinationsList) {
+    const destination = destinationsList.find(
+      (currentDestination) => currentDestination.name === evt.target.value
+    );
+
+    if (!destination) {
+      return;
+    }
+
+    this.updateElement({ destination: destination.id });
   }
+
 
   _handlePriceChange(evt) {
     // Удаляем всё, что не цифры
@@ -98,6 +105,7 @@ export default class AbstractPointFormView extends AbstractStatefulView {
     });
 
   }
+
 
   // Общий парсинг
   static parsePointToState(point) {
