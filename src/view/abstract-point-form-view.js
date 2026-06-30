@@ -17,16 +17,6 @@ export default class AbstractPointFormView extends AbstractStatefulView {
     this.updateElement(AbstractPointFormView.parsePointToState(point));
   }
 
-  _formatDate(date) {
-    return dayjs(date).format('DD/MM/YY HH:mm');
-  }
-
-  // Общие обработчики
-  _handleTypeChange(evt) {
-    evt.preventDefault();
-    this.updateElement({ type: evt.target.value });
-  }
-
   // Общий календарь
   _initDatepickers(startSelector, endSelector, state, onStart, onEnd) {
     if (this.#startDatepicker) {
@@ -46,6 +36,7 @@ export default class AbstractPointFormView extends AbstractStatefulView {
       minDate: 'today',
       onChange: ([date]) => {
         onStart(date);
+        this._validateForm();
         this.#endDatepicker.set('minDate', date);// обновляем ограничение конца
         if (this._state.dateTo < date) {
           // если конец уже раньше старта — двигаем конец
@@ -61,18 +52,21 @@ export default class AbstractPointFormView extends AbstractStatefulView {
       dateFormat: 'd/m/y H:i',
       defaultDate: state.dateTo,
       minDate: state.dateFrom,
-      onChange: ([date]) => onEnd(date)
+      onChange: ([date]) => {
+        onEnd(date);
+        this._validateForm();
+      }
     });
   }
 
-  removeElement() {
-    super.removeElement();
-    if (this.#startDatepicker) {
-      this.#startDatepicker.destroy();
-    }
-    if (this.#endDatepicker) {
-      this.#endDatepicker.destroy();
-    }
+  _formatDate(date) {
+    return dayjs(date).format('DD/MM/YY HH:mm');
+  }
+
+  // Общие обработчики
+  _handleTypeChange(evt) {
+    evt.preventDefault();
+    this.updateElement({ type: evt.target.value });
   }
 
   _handleOffersChange() {
@@ -81,15 +75,20 @@ export default class AbstractPointFormView extends AbstractStatefulView {
   }
 
   _handleDestinationChange(evt, destinationsList) {
-    const destination = destinationsList.find(
-      (currentDestination) => currentDestination.name === evt.target.value
-    );
+    const name = evt.target.value.trim();
 
-    if (!destination) {
+    // Ищем ID по имени
+    const destinationId = this._getDestinationIdByName(name, destinationsList);
+
+    // Если город не найден — валидируем форму
+    if (destinationId === null) {
+      this._setState({ destination: null });
+      this._validateForm();
       return;
     }
 
-    this.updateElement({ destination: destination.id });
+    // Если найден — обновляем форму
+    this.updateElement({ destination: destinationId });
   }
 
 
@@ -103,9 +102,32 @@ export default class AbstractPointFormView extends AbstractStatefulView {
     this._setState({
       basePrice: price
     });
-
+    this._validateForm();
   }
 
+  removeElement() {
+    super.removeElement();
+    if (this.#startDatepicker) {
+      this.#startDatepicker.destroy();
+    }
+    if (this.#endDatepicker) {
+      this.#endDatepicker.destroy();
+    }
+  }
+
+  _validateForm() {
+    const saveButton = this.element.querySelector('.event__save-btn');
+
+    const { destination, dateFrom, dateTo, basePrice } = this._state;
+
+    const isValid =
+      destination !== null &&
+      dateFrom !== null &&
+      dateTo !== null &&
+      Number(basePrice) > 0;
+
+    saveButton.disabled = !isValid;
+  }
 
   // Общий парсинг
   static parsePointToState(point) {

@@ -238,7 +238,7 @@ export default class NewPointFormView extends AbstractPointFormView {
       (date) => this._setState({ dateFrom: date }),
       (date) => this._setState({ dateTo: date })
     );
+    this._validateForm();
   }
-
 
 }
