@@ -105,6 +105,20 @@ export default class AbstractPointFormView extends AbstractStatefulView {
     this._validateForm();
   }
 
+  // общий submit‑обработчик
+  _handleFormSubmit(evt) {
+    evt.preventDefault();
+    const point = AbstractPointFormView.parseStateToPoint(this._state);
+    this._onFormSubmit(point);
+  }
+
+  // общий обработчик смены типа
+  _handleEventTypeChange(evt) {
+    evt.preventDefault();
+    this.updateElement({ type: evt.target.value });
+  }
+
+
   removeElement() {
     super.removeElement();
     if (this.#startDatepicker) {
@@ -131,10 +145,19 @@ export default class AbstractPointFormView extends AbstractStatefulView {
 
   // Общий парсинг
   static parsePointToState(point) {
-    return { ...point };
+    return { ...point,
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false
+    };
   }
 
   static parseStateToPoint(state) {
-    return { ...state };
+    const point = { ...state };
+
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
+    return point;
   }
 }
