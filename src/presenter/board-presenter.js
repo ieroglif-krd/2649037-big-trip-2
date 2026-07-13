@@ -68,9 +68,8 @@ export default class BoardPresenter {
     // Кнопка "New event"
     this.#newEventButton = this.#infoContainer.querySelector('.trip-main__event-add-btn');
 
-    this.#newEventButton.addEventListener('click', () => {
-      this.#newPointClickHandler();
-    });
+    this.#newEventButton.addEventListener('click', this.#onNewEventButtonClick);
+
 
     // Рендер фильтров
     const filtersAvailability = this.#getFiltersAvailability();
@@ -390,4 +389,8 @@ export default class BoardPresenter {
       this.#boardContainer.append(this.#listContainer);
     }
   }
+
+  #onNewEventButtonClick = () => {
+    this.#newPointClickHandler();
+  };
 }

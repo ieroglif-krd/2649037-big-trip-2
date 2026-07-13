@@ -10,9 +10,9 @@ const Mode = {
 };
 
 export default class PointPresenter {
-  #pointComponent = null;
-  #pointEditComponent = null;
-  #pointsListContainer = null;
+  #component = null;
+  #editComponent = null;
+  #listContainer = null;
   #point = null;
   #allEvents = null;
   #destinationsList = null;
@@ -24,23 +24,33 @@ export default class PointPresenter {
 
   constructor({ pointsModel, container, onDataChange, onModeChange }) {
     this.#pointsModel = pointsModel;
-    this.#pointsListContainer = container;
+    this.#listContainer = container;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
 
   init(point) {
     this.#point = point;
-    const prevPointComponent = this.#pointComponent;
-    const prevPointEditComponent = this.#pointEditComponent;
+    const prevPointComponent = this.#component;
+    const prevPointEditComponent = this.#editComponent;
 
-    this.#pointComponent = new PointView({
+    this.#createComponents(point);
+
+    if (!prevPointComponent || !prevPointEditComponent) {
+      return this.#renderInitial();
+    }
+
+    this.#renderUpdated(prevPointComponent, prevPointEditComponent);
+  }
+
+  #createComponents(point) {
+    this.#component = new PointView({
       point: this.#createPointView(point),
       onEditClick: this.#handleEditClick,
       onFavoriteClick: this.#handleFavoriteClick
     });
 
-    this.#pointEditComponent = new EditFormView({
+    this.#editComponent = new EditFormView({
       point,
       offers: this.#pointsModel.offers,
       destinations: this.#pointsModel.destinations,
@@ -48,34 +58,34 @@ export default class PointPresenter {
       onDelete: this.#handleDeleteClick,
       onRollup: this.#handleRollupClick
     });
-
-    if (prevPointComponent === null || prevPointEditComponent === null) {
-      render(this.#pointComponent, this.#pointsListContainer);
-      return;
-    }
-
-    if (this.#mode === Mode.DEFAULT) {
-      replace(this.#pointComponent, prevPointComponent);
-    }
-
-    if (this.#mode === Mode.EDITING) {
-      replace(this.#pointEditComponent, prevPointEditComponent);
-    }
-
-    remove(prevPointComponent);
-    remove(prevPointEditComponent);
   }
 
+  #renderInitial() {
+    this.#renderPoint();
+  }
+
+  #renderUpdated(prevPointComponent, prevPointEditComponent) {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#replacePoint(prevPointComponent, this.#component);
+    } else {
+      this.#replacePoint(prevPointEditComponent, this.#component);
+    }
+
+    this.#removePoint(prevPointComponent);
+    this.#removePoint(prevPointEditComponent);
+  }
+
+
   #replaceCardToForm = () => {
-    replace(this.#pointEditComponent, this.#pointComponent);
-    this.#pointEditComponent._restoreHandlers();
+    replace(this.#editComponent, this.#component);
+    this.#editComponent._restoreHandlers();
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   };
 
   #replaceFormToCard = () => {
-    replace(this.#pointComponent, this.#pointEditComponent);
+    replace(this.#component, this.#editComponent);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
   };
@@ -93,7 +103,7 @@ export default class PointPresenter {
   #escKeyDownHandler = (evt) => {
     if (isEsc(evt)) {
       evt.preventDefault();
-      this.#pointEditComponent.reset(this.#point);
+      this.#editComponent.reset(this.#point);
       this.#replaceFormToCard();
     }
   };
@@ -112,7 +122,7 @@ export default class PointPresenter {
   };
 
   #handleRollupClick = () => {
-    this.#pointEditComponent.reset(this.#point);
+    this.#editComponent.reset(this.#point);
     this.#replaceFormToCard();
   };
 
@@ -133,14 +143,27 @@ export default class PointPresenter {
     );
   };
 
+  #renderPoint() {
+    render(this.#component, this.#listContainer);
+  }
+
+  #replacePoint(oldComponent, newComponent) {
+    replace(newComponent, oldComponent);
+  }
+
+  #removePoint(component) {
+    remove(component);
+  }
+
+
   destroy() {
-    remove(this.#pointComponent);
-    remove(this.#pointEditComponent);
+    this.#removePoint(this.#component);
+    this.#removePoint(this.#editComponent);
   }
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#pointEditComponent.reset({
+      this.#editComponent.reset({
         ...this.#point,
         isDisabled: false,
         isSaving: false,
@@ -154,8 +177,8 @@ export default class PointPresenter {
 
   setSaving() {
     if (this.#mode === Mode.EDITING) {
-      this.#pointEditComponent.updateElement({
-        ...this.#pointEditComponent._state,
+      this.#editComponent.updateElement({
+        ...this.#editComponent._state,
         isDisabled: true,
         isSaving: true,
       });
@@ -164,8 +187,8 @@ export default class PointPresenter {
 
   setDeleting() {
     if (this.#mode === Mode.EDITING) {
-      this.#pointEditComponent.updateElement({
-        ...this.#pointEditComponent._state,
+      this.#editComponent.updateElement({
+        ...this.#editComponent._state,
         isDisabled: true,
         isDeleting: true,
       });
@@ -175,21 +198,20 @@ export default class PointPresenter {
   setAborting() {
     // Если форма сейчас не открыта — качаем карточку
     if (this.#mode === Mode.DEFAULT) {
-      this.#pointComponent.shake();
-      return;
+      return this.#component.shake();
     }
 
     // Если форма открыта — качаем форму и после анимации сбрасываем состояние
     const resetFormState = () => {
-      this.#pointEditComponent.updateElement({
-        ...this.#pointEditComponent._state,
+      this.#editComponent.updateElement({
+        ...this.#editComponent._state,
         isDisabled: false,
         isSaving: false,
         isDeleting: false,
       });
     };
 
-    this.#pointEditComponent.shake(resetFormState);
+    this.#editComponent.shake(resetFormState);
   }
 
 }

@@ -69,30 +69,19 @@ export default class FilterView extends AbstractView {
     this.#handleFilterChange = onFilterChange;
     this.#filtersAvailability = filtersAvailability;
 
-    this.element.addEventListener('change', (evt) => {
-      if (evt.target.name === 'trip-filter') {
-        this.#handleFilterChange(evt.target.value);
-      }
-    });
+    this.element.addEventListener('change', this.#onFilterChangeHandler);
   }
 
   get template() {
     return createFilterTemplate();
   }
 
-  /**
-   * Сбрасывает выбранный фильтр на "Everything".
-   * Используется только при нажатии на кнопку New Event (по ТЗ).
-   */
   reset() {
     const everythingInput = this.element.querySelector('#filter-everything');
     everythingInput.checked = true;
   }
 
-  /**
-   * Обновляет состояние disabled для всех фильтров.
-   * НЕ меняет checked — активный фильтр остаётся выбранным.
-   */
+
   updateDisabled(filtersAvailability) {
     this.#filtersAvailability = filtersAvailability;
 
@@ -101,4 +90,10 @@ export default class FilterView extends AbstractView {
     this.element.querySelector('#filter-present').disabled = !filtersAvailability.present;
     this.element.querySelector('#filter-past').disabled = !filtersAvailability.past;
   }
+
+  #onFilterChangeHandler = (evt) => {
+    if (evt.target.name === 'trip-filter') {
+      this.#handleFilterChange(evt.target.value);
+    }
+  };
 }

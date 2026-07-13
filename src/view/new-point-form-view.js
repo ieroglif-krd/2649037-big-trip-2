@@ -246,59 +246,13 @@ export default class NewPointFormView extends AbstractStatefulView {
 
 
   _restoreHandlers() {
-    /* TYPE */
-    this.element.querySelector('.event__type-group')
-      .addEventListener('change', (event) => {
-        this._handleTypeChange(event);
-      });
-
-    /* DESTINATION */
-    this.element.querySelector('.event__input--destination')
-      .addEventListener('input', (event) => {
-        this._handleDestinationChange(event, this.#destinations);
-      });
-
-    /* PRICE */
-    this.element.querySelector('.event__input--price')
-      .addEventListener('input', (event) => {
-        this._handlePriceChange(event);
-      });
-
-    /* OFFERS */
-    this.element.querySelectorAll('.event__offer-checkbox')
-      .forEach((checkboxElement) => {
-        checkboxElement.addEventListener('change', () => {
-          this._handleOffersChange();
-        });
-      });
-
-    /* SUBMIT */
-    this.element.querySelector('.event__save-btn')
-      .addEventListener('click', (event) => {
-        event.preventDefault();
-        this.#handleSubmit(NewPointFormView.parseStateToPoint(this._state));
-      });
-
-    /* CANCEL */
-    this.element.querySelector('.event__reset-btn')
-      .addEventListener('click', (event) => {
-        event.preventDefault();
-        this.#handleCancel();
-      });
-
-    /* DATEPICKERS */
-    this._initDatepickers(
-      '#event-start-time',
-      '#event-end-time',
-      this._state,
-      (date) => {
-        this._setState({ dateFrom: date });
-      },
-      (date) => {
-        this._setState({ dateTo: date });
-      }
-    );
-
+    this.#restoreTypeHandlers();
+    this.#restoreDestinationHandlers();
+    this.#restorePriceHandlers();
+    this.#restoreOffersHandlers();
+    this.#restoreSubmitHandlers();
+    this.#restoreCancelHandlers();
+    this.#initDatepickersHandlers();
     this._validateForm();
   }
 
@@ -340,8 +294,7 @@ export default class NewPointFormView extends AbstractStatefulView {
 
     if (destinationId === null) {
       this._setState({ destination: null });
-      this._validateForm();
-      return;
+      return this._validateForm();
     }
 
     this._setState({ destination: destinationId });
@@ -359,18 +312,14 @@ export default class NewPointFormView extends AbstractStatefulView {
   }
 
   _initDatepickers(startSelector, endSelector, state, onStart, onEnd) {
-    if (this.#startDatepicker) {
-      this.#startDatepicker.destroy();
-    }
+    this.#initStartDatepicker(startSelector, state, onStart, onEnd);
+    this.#initEndDatepicker(endSelector, state, onEnd);
+  }
 
-    if (this.#endDatepicker) {
-      this.#endDatepicker.destroy();
-    }
+  #initStartDatepicker(selector, state, onStart, onEnd) {
+    const startInput = this.element.querySelector(selector);
 
-    const startField = this.element.querySelector(startSelector);
-    const endField = this.element.querySelector(endSelector);
-
-    this.#startDatepicker = flatpickr(startField, {
+    this.#startDatepicker = flatpickr(startInput, {
       enableTime: true,
       dateFormat: DATE_FORMAT,
       defaultDate: state.dateFrom,
@@ -381,16 +330,20 @@ export default class NewPointFormView extends AbstractStatefulView {
         this.#endDatepicker.set('minDate', date);
 
         if (this._state.dateTo < date) {
-          const newEnd = new Date(date.getTime() + DELAY_TIME);
+          const newEnd = this.#getCorrectedEndDate(date);
           onEnd(newEnd);
           this.#endDatepicker.setDate(newEnd, false);
         }
       }
     });
+  }
 
-    this.#endDatepicker = flatpickr(endField, {
+  #initEndDatepicker(selector, state, onEnd) {
+    const endInput = this.element.querySelector(selector);
+
+    this.#endDatepicker = flatpickr(endInput, {
       enableTime: true,
-      dateFormat: 'd/m/y H:i',
+      dateFormat: DATE_FORMAT,
       defaultDate: state.dateTo,
       minDate: state.dateFrom,
       onChange: ([date]) => {
@@ -399,6 +352,11 @@ export default class NewPointFormView extends AbstractStatefulView {
       }
     });
   }
+
+  #getCorrectedEndDate(date) {
+    return new Date(date.getTime() + DELAY_TIME);
+  }
+
 
   _validateForm() {
     const saveButton = this.element.querySelector('.event__save-btn');
@@ -409,7 +367,7 @@ export default class NewPointFormView extends AbstractStatefulView {
       destination !== null &&
       dateFrom !== null &&
       dateTo !== null &&
-      Number(basePrice) > 0;
+      basePrice > 0;
 
     saveButton.disabled = !isValid;
   }
@@ -431,6 +389,79 @@ export default class NewPointFormView extends AbstractStatefulView {
       parent.replaceChild(newElement, previousElement);
     }
   }
+
+  // ОБРАБОТЧИКИ СОБЫТИЙ — ИМЕНОВАННЫЕ МЕТОДЫ
+
+  _onTypeGroupChange = (evt) => {
+    this._handleTypeChange(evt);
+  };
+
+  _onDestinationInputChange = (evt) => {
+    this._handleDestinationChange(evt, this.#destinations);
+  };
+
+  _onPriceInputChange = (evt) => {
+    this._handlePriceChange(evt);
+  };
+
+  _onOfferCheckboxChange = () => {
+    this._handleOffersChange();
+  };
+
+  _onSaveButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#handleSubmit(NewPointFormView.parseStateToPoint(this._state));
+  };
+
+  _onResetButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#handleCancel();
+  };
+
+
+  #restoreTypeHandlers() {
+    const typeGroupElement = this.element.querySelector('.event__type-group');
+    typeGroupElement.addEventListener('change', this._onTypeGroupChange);
+  }
+
+  #restoreDestinationHandlers() {
+    const destinationInputElement = this.element.querySelector('.event__input--destination');
+    destinationInputElement.addEventListener('input', this._onDestinationInputChange);
+  }
+
+  #restorePriceHandlers() {
+    const priceInputElement = this.element.querySelector('.event__input--price');
+    priceInputElement.addEventListener('input', this._onPriceInputChange);
+  }
+
+  #restoreOffersHandlers() {
+    const offerCheckboxElements = this.element.querySelectorAll('.event__offer-checkbox');
+    offerCheckboxElements.forEach((checkbox) =>
+      checkbox.addEventListener('change', this._onOfferCheckboxChange)
+    );
+  }
+
+  #restoreSubmitHandlers() {
+    const saveButtonElement = this.element.querySelector('.event__save-btn');
+    saveButtonElement.addEventListener('click', this._onSaveButtonClick);
+  }
+
+  #restoreCancelHandlers() {
+    const resetButtonElement = this.element.querySelector('.event__reset-btn');
+    resetButtonElement.addEventListener('click', this._onResetButtonClick);
+  }
+
+
+  #initDatepickersHandlers() {
+    this._initDatepickers(
+      '#event-start-time',
+      '#event-end-time',
+      this._state,
+      (date) => this._setState({ dateFrom: date }),
+      (date) => this._setState({ dateTo: date })
+    );
+  }
+
 
   static parsePointToState(point) {
     return {
