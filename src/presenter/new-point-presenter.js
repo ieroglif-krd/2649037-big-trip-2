@@ -1,4 +1,5 @@
 import { render, remove } from '../framework/render.js';
+import { isEsc } from '../utils.js';
 import NewPointFormView from '../view/new-point-form-view.js';
 
 export default class NewPointPresenter {
@@ -25,8 +26,8 @@ export default class NewPointPresenter {
       onCancel: this.#handleCancel
     });
 
-    this.#formComponent._restoreHandlers();
     render(this.#formComponent, this.#container, 'afterbegin');
+    this.#formComponent._restoreHandlers();
 
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
@@ -38,7 +39,7 @@ export default class NewPointPresenter {
   }
 
   #escKeyDownHandler = (event) => {
-    if (event.key === 'Escape') {
+    if (isEsc(event)) {
       event.preventDefault();
       this.#handleCancel();
     }

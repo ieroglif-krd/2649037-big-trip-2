@@ -5,19 +5,19 @@ import 'flatpickr/dist/flatpickr.min.css';
 import he from 'he';
 import { POINT_EMPTY, DELAY_TIME, DATE_FORMAT } from '../const.js';
 
-function createNewPointFormTemplate(state, allOffers, destinationsList, buttonsTemplate) {
-  const {
-    type,
-    destination,
-    dateFrom,
-    dateTo,
-    basePrice,
-    offers,
-    isDisabled
-  } = state;
+function createNewPointFormTemplate(
+  state,
+  allOffers,
+  destinationsList,
+  buttonsTemplate,
+) {
+  const { type, destination, dateFrom, dateTo, basePrice, offers, isDisabled } =
+    state;
 
   const destinationData =
-    destinationsList.find((destinationItem) => destinationItem.id === destination) || {};
+    destinationsList.find(
+      (destinationItem) => destinationItem.id === destination,
+    ) || {};
 
   const destinationName = he.encode(destinationData.name || '');
 
@@ -25,7 +25,8 @@ function createNewPointFormTemplate(state, allOffers, destinationsList, buttonsT
     allOffers.find((offerGroup) => offerGroup.type === type)?.offers || [];
 
   const offersTemplate = offersForType
-    .map((offerItem) => `
+    .map(
+      (offerItem) => `
       <div class="event__offer-selector">
         <input
           class="event__offer-checkbox visually-hidden"
@@ -40,7 +41,8 @@ function createNewPointFormTemplate(state, allOffers, destinationsList, buttonsT
           &plus;&euro;&nbsp;<span class="event__offer-price">${he.encode(String(offerItem.price))}</span>
         </label>
       </div>
-    `)
+    `,
+    )
     .join('');
 
   const photosTemplate =
@@ -54,7 +56,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList, buttonsT
             <div class="event__photos-tape">
               ${destinationData.pictures.map((pictureItem) => `
                 <img class="event__photo" src="${he.encode(pictureItem.src)}" alt="${he.encode(pictureItem.description)}">
-              `).join('')}
+              `,).join('')}
             </div>
           </div>
         </section>
@@ -102,7 +104,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList, buttonsT
                     ${he.encode(offerGroup.type)}
                   </label>
                 </div>
-              `).join('')}
+              `,).join('')}
             </fieldset>
           </div>
         </div>
@@ -129,7 +131,7 @@ function createNewPointFormTemplate(state, allOffers, destinationsList, buttonsT
                 value="${he.encode(destinationItem.name)}"
                 data-destination-id="${destinationItem.id}"
               ></option>
-            `).join('')}
+            `,).join('')}
           </datalist>
         </div>
 
@@ -192,7 +194,8 @@ function createNewPointFormTemplate(state, allOffers, destinationsList, buttonsT
               ${offersTemplate}
             </div>
           </section>
-        ` : ''}
+        ` : ''
+}
 
         <!-- DESTINATION DETAILS -->
         ${photosTemplate}
@@ -224,7 +227,7 @@ export default class NewPointFormView extends AbstractStatefulView {
       this._state,
       this.#offers,
       this.#destinations,
-      this.getButtonsTemplate()
+      this.getButtonsTemplate(),
     );
   }
 
@@ -264,7 +267,9 @@ export default class NewPointFormView extends AbstractStatefulView {
   }
 
   _getDestinationIdByName(name, list) {
-    const foundDestination = list.find((destinationItem) => destinationItem.name === name);
+    const foundDestination = list.find(
+      (destinationItem) => destinationItem.name === name,
+    );
     return foundDestination ? foundDestination.id : null;
   }
 
@@ -272,14 +277,21 @@ export default class NewPointFormView extends AbstractStatefulView {
     event.preventDefault();
     this._setState({
       type: event.target.value,
-      offers: []
+      offers: [],
+    });
+
+    this.updateElement({
+      type: event.target.value,
+      offers: [],
     });
   }
 
   _handleOffersChange() {
-    const offersChecked = this.element.querySelectorAll('.event__offer-checkbox:checked');
+    const offersChecked = this.element.querySelectorAll(
+      '.event__offer-checkbox:checked',
+    );
     this._setState({
-      offers: [...offersChecked].map((offerElement) => offerElement.value)
+      offers: [...offersChecked].map((offerElement) => offerElement.value),
     });
   }
 
@@ -292,8 +304,9 @@ export default class NewPointFormView extends AbstractStatefulView {
       return this._validateForm();
     }
 
-    this._setState({ destination: destinationId });
+    this.updateElement({ destination: destinationId });
     this._validateForm();
+
   }
 
   _handlePriceChange(event) {
@@ -301,7 +314,7 @@ export default class NewPointFormView extends AbstractStatefulView {
     const price = Number(event.target.value);
 
     this._setState({
-      basePrice: price
+      basePrice: price,
     });
     this._validateForm();
   }
@@ -329,7 +342,7 @@ export default class NewPointFormView extends AbstractStatefulView {
           onEnd(newEnd);
           this.#endDatepicker.setDate(newEnd, false);
         }
-      }
+      },
     });
   }
 
@@ -344,7 +357,7 @@ export default class NewPointFormView extends AbstractStatefulView {
       onChange: ([date]) => {
         onEnd(date);
         this._validateForm();
-      }
+      },
     });
   }
 
@@ -368,20 +381,6 @@ export default class NewPointFormView extends AbstractStatefulView {
 
   reset(point) {
     this.updateElement(NewPointFormView.parsePointToState(point));
-  }
-
-  updateElement(update) {
-    this._setState(update);
-
-    const previousElement = this.element;
-    const parent = previousElement.parentElement;
-
-    this.removeElement();// уничтожает datepickers
-    const newElement = this.element; // пересоздаёт DOM и вызывает _restoreHandlers()
-
-    if (parent !== null) {
-      parent.replaceChild(newElement, previousElement);
-    }
   }
 
   // ОБРАБОТЧИКИ СОБЫТИЙ — ИМЕНОВАННЫЕ МЕТОДЫ
@@ -412,26 +411,34 @@ export default class NewPointFormView extends AbstractStatefulView {
     this.#handleCancel();
   };
 
-
   #restoreTypeHandlers() {
     const typeGroupElement = this.element.querySelector('.event__type-group');
     typeGroupElement.addEventListener('change', this._onTypeGroupChange);
   }
 
   #restoreDestinationHandlers() {
-    const destinationInputElement = this.element.querySelector('.event__input--destination');
-    destinationInputElement.addEventListener('input', this._onDestinationInputChange);
+    const destinationInputElement = this.element.querySelector(
+      '.event__input--destination',
+    );
+    destinationInputElement.addEventListener(
+      'input',
+      this._onDestinationInputChange,
+    );
   }
 
   #restorePriceHandlers() {
-    const priceInputElement = this.element.querySelector('.event__input--price');
+    const priceInputElement = this.element.querySelector(
+      '.event__input--price',
+    );
     priceInputElement.addEventListener('input', this._onPriceInputChange);
   }
 
   #restoreOffersHandlers() {
-    const offerCheckboxElements = this.element.querySelectorAll('.event__offer-checkbox');
+    const offerCheckboxElements = this.element.querySelectorAll(
+      '.event__offer-checkbox',
+    );
     offerCheckboxElements.forEach((checkbox) =>
-      checkbox.addEventListener('change', this._onOfferCheckboxChange)
+      checkbox.addEventListener('change', this._onOfferCheckboxChange),
     );
   }
 
@@ -445,14 +452,13 @@ export default class NewPointFormView extends AbstractStatefulView {
     resetButtonElement.addEventListener('click', this._onResetButtonClick);
   }
 
-
   #initDatepickersHandlers() {
     this._initDatepickers(
       '#event-start-time',
       '#event-end-time',
       this._state,
       (date) => this._setState({ dateFrom: date }),
-      (date) => this._setState({ dateTo: date })
+      (date) => this._setState({ dateTo: date }),
     );
   }
 
@@ -461,7 +467,7 @@ export default class NewPointFormView extends AbstractStatefulView {
       ...point,
       isDisabled: false,
       isSaving: false,
-      isDeleting: false
+      isDeleting: false,
     };
   }
 
