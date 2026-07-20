@@ -41,6 +41,26 @@ export default class PointPresenter {
     this.#renderUpdated(prevPointComponent, prevPointEditComponent);
   }
 
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editComponent.setSaving();
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editComponent.setDeleting();
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      return this.#component.shake();
+    }
+
+    this.#editComponent.setAborting();
+  }
+
   #createComponents(point) {
     this.#component = new PointView({
       point: this.#createPointView(point),
@@ -97,6 +117,36 @@ export default class PointPresenter {
     };
   }
 
+  #renderPoint() {
+    render(this.#component, this.#listContainer);
+  }
+
+  #replacePoint(oldComponent, newComponent) {
+    replace(newComponent, oldComponent);
+  }
+
+  #removePoint(component) {
+    remove(component);
+  }
+
+  destroy() {
+    this.#removePoint(this.#component);
+    this.#removePoint(this.#editComponent);
+  }
+
+  resetView() {
+    if (this.#mode !== Mode.DEFAULT) {
+      this.#editComponent.reset({
+        ...this.#point,
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+
+      this.#replaceFormToCard();
+    }
+
+  }
 
   #escKeyDownHandler = (evt) => {
     if (isEsc(evt)) {
@@ -140,76 +190,4 @@ export default class PointPresenter {
       point,
     );
   };
-
-  #renderPoint() {
-    render(this.#component, this.#listContainer);
-  }
-
-  #replacePoint(oldComponent, newComponent) {
-    replace(newComponent, oldComponent);
-  }
-
-  #removePoint(component) {
-    remove(component);
-  }
-
-
-  destroy() {
-    this.#removePoint(this.#component);
-    this.#removePoint(this.#editComponent);
-  }
-
-  resetView() {
-    if (this.#mode !== Mode.DEFAULT) {
-      this.#editComponent.reset({
-        ...this.#point,
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false
-      });
-
-      this.#replaceFormToCard();
-    }
-
-  }
-
-  setSaving() {
-    if (this.#mode === Mode.EDITING) {
-      this.#editComponent.updateElement({
-        ...this.#editComponent._state,
-        isDisabled: true,
-        isSaving: true,
-      });
-    }
-  }
-
-  setDeleting() {
-    if (this.#mode === Mode.EDITING) {
-      this.#editComponent.updateElement({
-        ...this.#editComponent._state,
-        isDisabled: true,
-        isDeleting: true,
-      });
-    }
-  }
-
-  setAborting() {
-    // Если форма сейчас не открыта — качаем карточку
-    if (this.#mode === Mode.DEFAULT) {
-      return this.#component.shake();
-    }
-
-    // Если форма открыта — качаем форму и после анимации сбрасываем состояние
-    const resetFormState = () => {
-      this.#editComponent.updateElement({
-        ...this.#editComponent._state,
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false,
-      });
-    };
-
-    this.#editComponent.shake(resetFormState);
-  }
-
 }

@@ -32,6 +32,10 @@ export default class NewPointPresenter {
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
 
+  setSaving() {
+    this.#formComponent.setSaving();
+  }
+
   destroy() {
     remove(this.#formComponent);
     this.#formComponent = null;
@@ -57,11 +61,4 @@ export default class NewPointPresenter {
     this.#formComponent.shake(resetFormState);
   }
 
-  setSaving() {
-    this.#formComponent.updateElement({
-      ...this.#formComponent._state,
-      isDisabled: true,
-      isSaving: true,
-    });
-  }
 }

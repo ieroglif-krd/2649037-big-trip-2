@@ -243,6 +243,30 @@ export default class NewPointFormView extends AbstractStatefulView {
     `;
   }
 
+  setSaving() {
+    this.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setDeleting() {
+    this.updateElement({
+      isDisabled: true,
+      isDeleting: true,
+    });
+  }
+
+  setAborting() {
+    this.shake(() => {
+      this.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    });
+  }
+
   _restoreHandlers() {
     this.#restoreTypeHandlers();
     this.#restoreDestinationHandlers();
